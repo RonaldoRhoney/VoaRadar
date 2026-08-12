@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import get_settings
-from app.routers import flights, health
+from app.api import flights, health
+from app.core.config import get_settings
 
 settings = get_settings()
 

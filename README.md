@@ -20,6 +20,7 @@ npm run dev   # http://localhost:5173
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements/dev.txt   # inclui requirements/base.txt + deps de teste
 uvicorn app.main:app --reload --port 8000   # http://localhost:8000/health
+pytest                                       # roda os testes
 ```

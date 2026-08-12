@@ -1,4 +1,4 @@
-import { BudgetSearchForm } from "../components/BudgetSearchForm";
+import { BudgetSearchForm } from "../features/budget-search/BudgetSearchForm";
 
 export function Home() {
   return (

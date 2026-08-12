@@ -26,3 +26,25 @@ Registro cronológico de arquitetura → decisões → código → problemas →
 
 **Sugestão futura**: decidir como esse FastAPI vai para produção (Vercel via runtime Python, ou outro host) — não decidido ainda, não implementado.
 **Sugestão futura**: autenticação de usuário (contas, buscas salvas, alertas de preço) — fora do MVP, ver [PRD.md](../PRD.md).
+
+## 2026-08-12 — Governança do projeto: CLAUDE.md formal + reestruturação para v0.1
+
+**Decisão do usuário**: adoção de um `CLAUDE.md` detalhado (25 seções) formalizando regras já seguidas informalmente (não implementar ideia não pedida, não codificar sem plano, hierarquia de decisões, formato de comunicação Entendimento/Estado atual/Plano/Riscos) e definindo a arquitetura-alvo do projeto.
+
+**Conflito identificado, não resolvido silenciosamente**: o documento fornecido pelo usuário usava "Roney Inc." em uma seção e "RhoneyInc." em outra — inconsistência interna. Sinalizado ao usuário, que confirmou **RhoneyInc** como o nome correto (consistente com o resto do ecossistema).
+
+**Decisão**: reestruturação completa para bater com a arquitetura da seção 11 do `CLAUDE.md`:
+- Backend: `app/api/` (rotas), `app/core/` (config), `app/schemas/` (Pydantic request/response), `app/services/` (regra de negócio, desacoplada do provider), `app/providers/` (`FlightProvider` abstrato + `MockFlightProvider` — preparando pra Amadeus/Duffel sem acoplar a nenhum ainda), `tests/`, `requirements/base.txt`+`requirements/dev.txt` (substituindo o `requirements.txt` único).
+- Frontend: `features/budget-search/` (formulário + hook `useBudgetSearch`), `services/api.ts` (chamada real ao backend, com tratamento de erro), `utils/format.ts`, `tests/e2e/` (Playwright).
+- **Ajuste informado, não silencioso**: não foi criada uma pasta `hooks/` vazia no frontend nem `app/models/` no backend — ainda não existe um hook genérico reaproveitável nem uma entidade de banco real, e a seção 12 do `CLAUDE.md` pede pra não criar estrutura antes de necessária.
+- `SearchForm`/`InspireMe` (código morto desde a mudança pro fluxo de orçamento) removidos, por decisão do usuário.
+
+**Problema encontrado ao rodar o E2E pela primeira vez**: `getByText("Voa Radar")` batia em 4 elementos (header, h1, footer, copyright) — falha de seletor "strict mode violation" do Playwright.
+**Solução**: trocado para `getByRole("heading", { name: "Voa Radar" })`, específico o suficiente.
+
+**Problema encontrado ao rodar `npm run test`**: o Vitest tentou executar o spec do Playwright (`tests/e2e/*.spec.ts`) como se fosse um teste seu, porque não havia um `include` explícito — erro de conflito entre os dois test runners.
+**Solução**: `vite.config.ts` → `test.include: ['src/**/*.test.ts', 'src/**/*.test.tsx']`, escopando o Vitest só pros testes unitários em `src/`.
+
+**Resultado**: `pytest` (4), Vitest (3) e Playwright E2E (1) passando juntos. Responsividade (desktop 1280px + mobile 390px) e tratamento de erro (testado contra o backend real derrubado, não só lido no código) validados com capturas reais do app, publicadas como artifact pro usuário revisar antes do commit.
+
+**v0.1 considerada funcionalmente fechada** — ver checklist em [ROADMAP.md](../ROADMAP.md). Deploy fica para v0.2, por decisão registrada com o usuário (não fazia parte do escopo original da v0.1 definido no `PROJECT_CONTEXT.md`).

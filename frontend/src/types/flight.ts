@@ -1,26 +1,12 @@
-export interface Airport {
-  code: string;
+export interface BudgetDestination {
   city: string;
-  country: string;
-}
-
-export interface FlightOffer {
-  id: string;
-  origin: Airport;
-  destination: Airport;
-  airline: string;
-  departure: string;
-  arrival: string;
-  durationMinutes: number;
-  stops: number;
+  uf: string;
   price: number;
-  currency: string;
 }
 
-export interface SearchParams {
-  origin: string;
-  destination: string;
-  departureDate: string;
-  returnDate?: string;
-  passengers: number;
+export interface BudgetSearchParams {
+  budget: number;
+  originCity: string;
+  month: string;
+  flexible: boolean;
 }
