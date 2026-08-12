@@ -6,12 +6,13 @@ const MONTHS = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-export function BudgetSearchForm() {
+export function ExploreSearchForm() {
   const navigate = useNavigate();
   const [budget, setBudget] = useState(800);
   const [origin, setOrigin] = useState("");
   const [month, setMonth] = useState("");
   const [flexible, setFlexible] = useState(true);
+  const [passengers, setPassengers] = useState(1);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -20,6 +21,7 @@ export function BudgetSearchForm() {
       origem: origin,
       mes: month,
       flexivel: String(flexible),
+      passageiros: String(passengers),
     });
     navigate(`/resultados?${params.toString()}`);
   }
@@ -58,24 +60,39 @@ export function BudgetSearchForm() {
         />
       </label>
 
-      <label className="flex flex-col gap-2 text-sm text-white/70">
-        Quando você quer viajar?
-        <select
-          required
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
-        >
-          <option value="" disabled>
-            Selecione um mês
-          </option>
-          {MONTHS.map((m) => (
-            <option key={m} value={m}>
-              {m}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm text-white/70">
+          Quando você quer viajar?
+          <select
+            required
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+          >
+            <option value="" disabled>
+              Selecione um mês
             </option>
-          ))}
-        </select>
-      </label>
+            {MONTHS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm text-white/70">
+          Quantas pessoas?
+          <input
+            required
+            type="number"
+            min={1}
+            max={9}
+            value={passengers}
+            onChange={(e) => setPassengers(Number(e.target.value))}
+            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+          />
+        </label>
+      </div>
 
       <label className="flex items-center gap-2 text-sm text-white/70">
         <input

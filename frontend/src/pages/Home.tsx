@@ -1,4 +1,4 @@
-import { BudgetSearchForm } from "../features/budget-search/BudgetSearchForm";
+import { ExploreSearchForm } from "../features/explore/ExploreSearchForm";
 
 export function Home() {
   return (
@@ -11,7 +11,7 @@ export function Home() {
       </div>
 
       <div className="mt-8">
-        <BudgetSearchForm />
+        <ExploreSearchForm />
       </div>
     </section>
   );

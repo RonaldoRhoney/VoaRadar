@@ -1,12 +1,12 @@
 from fastapi import APIRouter
 
-from app.schemas.flight import BudgetDestination, BudgetSearchRequest
-from app.services.budget_search_service import BudgetSearchService
+from app.schemas.flight import ExploreRequest, ExploreResponse
+from app.services.explore_service import ExploreService
 
 router = APIRouter(prefix="/flights", tags=["flights"])
 
 
-@router.post("/budget-search", response_model=list[BudgetDestination])
-def budget_search(payload: BudgetSearchRequest):
-    service = BudgetSearchService()
-    return service.search(payload)
+@router.post("/explore", response_model=ExploreResponse)
+def explore(payload: ExploreRequest):
+    service = ExploreService()
+    return service.explore(payload)

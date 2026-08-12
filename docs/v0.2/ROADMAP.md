@@ -17,11 +17,11 @@ Este é o roadmap de produto (visão de longo prazo). Para o roadmap de execuç�
 
 ## v0.2 — Explore
 
-**STATUS: EM ANDAMENTO**
+**STATUS: CONCLUÍDA** (tag `v0.2.0`)
 
 Objetivo: descobrir destinos através do orçamento.
 
-Principais recursos: exploração, múltiplos destinos, filtros, ordenação, flexibilidade, cards, classificação, UX aprimorada.
+Principais recursos: exploração, múltiplos destinos, filtros, ordenação, flexibilidade, cards, classificação, UX aprimorada — todos entregues. Detalhe completo em [ACCEPTANCE.md](ACCEPTANCE.md) e [DECISIONS.md](DECISIONS.md).
 
 ## v0.3 — Inteligência de preços
 

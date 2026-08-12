@@ -18,16 +18,27 @@ Este arquivo é o log de execução da **v0.1** (o que foi feito, passo a passo)
 
 **v0.1 está funcionalmente fechada** (frontend + backend + integração + testes + docs), rodando só local, sem deploy — deploy é item de v0.2 (ver [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)).
 
+## v0.2 — Explore
+
+- [x] Contrato `Destination`/`Offer` — um destino pode ter várias ofertas, cada oferta com id próprio (`docs/v0.2/DECISIONS.md` DEC-009).
+- [x] `MockFlightProvider` expandido: 4 destinos, 2–3 ofertas cada, com data, duração, escalas, companhia.
+- [x] `ExploreService`: classifica `within_budget`/`near_budget`, ordena, marca `highlight: "best_price"` sem fabricar índice de oportunidade (DEC-010).
+- [x] Endpoint `POST /flights/explore` substituindo `/flights/budget-search`.
+- [x] Frontend: `features/explore/` (form com passageiros, cards, filtros, ordenação), detalhe da oferta por id (não mais reconstruído via query string solta).
+- [x] Estado "nenhum resultado" sugerindo a opção mais barata acima do orçamento (`near_budget`).
+- [x] Testes: 10 backend (pytest), 13 frontend (Vitest), 2 E2E (Playwright) — todos passando.
+- [x] Responsividade validada em mobile (390px), tablet (768px) e desktop (1280px).
+
+Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECISIONS.md](docs/v0.2/DECISIONS.md): painel de filtros único em vez de sidebar+bottom sheet (DEC-011), filtro de escalas simplificado (DEC-012), sem filtro de período (DEC-013), margem de "próximo do orçamento" fixa em R$ 100 (DEC-014).
+
+**v0.2 está funcionalmente fechada**, ainda 100% mock, sem deploy.
+
 ## Próximo
-
-**v0.2 — Explore**: planejamento completo em [docs/v0.2/](docs/v0.2/) (`CONTEXT.md`, `PRD.md`, `UX.md`, `ARCHITECTURE.md`, `IMPLEMENTATION.md`, `ACCEPTANCE.md`, `DECISIONS.md`). Objetivo: transformar a busca por orçamento numa experiência de exploração — múltiplos destinos, filtros, ordenação, cards, ainda 100% mock. Execução por fases, ver `IMPLEMENTATION.md`.
-
-**Depois de v0.2** (sem decisão de quando):
 
 - [ ] Deploy (Vercel) — frontend e backend.
 - [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`).
-- [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox) — v0.2/v0.3.
-- [ ] Histórico e análise de preços (v0.3).
+- [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox).
+- [ ] Histórico e análise de preços (v0.3) — inclui calendário completo de flexibilidade de datas (DEC-008).
 - [ ] Alertas (v0.4).
 - [ ] Inteligência artificial (v0.5).
 
