@@ -1,6 +1,6 @@
 # Roadmap — Voa Radar
 
-Log detalhado de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). Visão de versões (v0.1 → v1.0) em [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md).
+Log detalhado de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). Visão de versões (v0.1 → v1.0) em [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
 
 ## v0.1 — Fundação + interface + busca com mock data
 
