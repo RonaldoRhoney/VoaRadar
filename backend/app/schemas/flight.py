@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class BudgetSearchRequest(BaseModel):
-    budget: float
-    origin_city: str
-    month: str
+    budget: float = Field(gt=0)
+    origin_city: str = Field(min_length=1)
+    month: str = Field(min_length=1)
     flexible: bool = True
 
 

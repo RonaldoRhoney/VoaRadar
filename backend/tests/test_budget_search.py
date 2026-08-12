@@ -28,6 +28,12 @@ def test_budget_search_returns_empty_list_when_nothing_fits():
     assert response.json() == []
 
 
+def test_budget_search_rejects_non_positive_budget():
+    response = client.post("/flights/budget-search", json=_payload(budget=0))
+
+    assert response.status_code == 422
+
+
 class _FakeProvider(FlightProvider):
     def get_budget_destinations(self, origin_city, month, budget):
         return [BudgetDestination(city="Teste", uf="TS", price=100)]
