@@ -1,6 +1,6 @@
 # Roadmap — Voa Radar
 
-Log detalhado de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). Visão de versões (v0.1 → v1.0) em [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
+Este arquivo é o log de execução da **v0.1** (o que foi feito, passo a passo). Roadmap de versões (v0.1 → v1.0) em [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) e, com mais detalhe, em [docs/v0.2/ROADMAP.md](docs/v0.2/ROADMAP.md). Log de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md). Planejamento completo da v0.2 em [docs/v0.2/](docs/v0.2/).
 
 ## v0.1 — Fundação + interface + busca com mock data
 
@@ -18,11 +18,14 @@ Log detalhado de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). 
 
 **v0.1 está funcionalmente fechada** (frontend + backend + integração + testes + docs), rodando só local, sem deploy — deploy é item de v0.2 (ver [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)).
 
-## Próximo (v0.2 em diante, sem decisão de quando)
+## Próximo
+
+**v0.2 — Explore**: planejamento completo em [docs/v0.2/](docs/v0.2/) (`CONTEXT.md`, `PRD.md`, `UX.md`, `ARCHITECTURE.md`, `IMPLEMENTATION.md`, `ACCEPTANCE.md`, `DECISIONS.md`). Objetivo: transformar a busca por orçamento numa experiência de exploração — múltiplos destinos, filtros, ordenação, cards, ainda 100% mock. Execução por fases, ver `IMPLEMENTATION.md`.
+
+**Depois de v0.2** (sem decisão de quando):
 
 - [ ] Deploy (Vercel) — frontend e backend.
 - [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`).
-- [ ] Explorar destinos (v0.2, conforme visão do produto).
 - [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox) — v0.2/v0.3.
 - [ ] Histórico e análise de preços (v0.3).
 - [ ] Alertas (v0.4).

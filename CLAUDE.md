@@ -1,10 +1,12 @@
 # Voa Radar — Instruções para Claude Code
 
+> Documentação por versão: os documentos abaixo (PRD, PROJECT_CONTEXT, ROADMAP) descrevem o projeto como um todo. Planejamento específico de cada versão em desenvolvimento fica em `docs/v{X.Y}/` — hoje, [docs/v0.2/](docs/v0.2/) (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões). A auditoria da v0.1 está em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
+
 ## 1. Identidade do projeto
 
 Você está trabalhando no **Voa Radar**, produto da **RhoneyInc**.
 
-> Nota: a versão deste documento fornecida pelo usuário em 2026-08-12 diz "Roney Inc." em vez de "RhoneyInc". Todo o resto do projeto (footer, domínio `rhoneyinc.com/voaradar`, memória do ecossistema, demais produtos-irmãos) usa "RhoneyInc". Mantive "RhoneyInc" aqui por consistência, mas isso é uma divergência não resolvida — ver conflito sinalizado na conversa, não decidido silenciosamente.
+> Nota: a versão deste documento fornecida pelo usuário em 2026-08-12 dizia "Roney Inc." em vez de "RhoneyInc" em uma seção (inconsistente com a própria seção 23 do documento). Sinalizado ao usuário, que confirmou **RhoneyInc** como o nome correto — consistente com o resto do ecossistema (footer, domínio `rhoneyinc.com/voaradar`, demais produtos-irmãos). Resolvido, não é mais um conflito em aberto.
 
 O Voa Radar é uma plataforma de tecnologia voltada à descoberta de oportunidades de viagens aéreas.
 
