@@ -35,7 +35,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 ## v0.3 — Price Intelligence
 
-**STATUS: EM ANDAMENTO** — documentação completa em [docs/v0.3/](docs/v0.3/). Objetivo: "esse preço é realmente bom?" — histórico de preços persistido via Supabase, motor de análise (média/mediana/mínimo/máximo/score/confiança) transparente, sem fabricar inteligência artificial. Execução por fases, ver [docs/v0.3/IMPLEMENTATION.md](docs/v0.3/IMPLEMENTATION.md).
+**STATUS: FECHADA** (tag `v0.3.0`) — documentação completa em [docs/v0.3/](docs/v0.3/). Objetivo: "esse preço é realmente bom?" — histórico de preços persistido via Supabase, motor de análise (média/mediana/mínimo/máximo/score/confiança) transparente, sem fabricar inteligência artificial. Execução por fases, ver [docs/v0.3/IMPLEMENTATION.md](docs/v0.3/IMPLEMENTATION.md).
 
 - [x] FASE 1 — modelo de dados (`Airport`, `Airline`, `Route`, `FlightObservation`, `PriceSnapshot`) + migration inicial.
 - [x] FASE 2 — conectado ao Supabase real, migration aplicada (5 tabelas), rollback testado.
@@ -45,11 +45,14 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] FASE 6 — `PriceIntelligenceService` (`app/services/`): combina repository + analytics engine; `analyze_offer(provider_offer_id, current_price)` resolve rota → histórico → análise, `analyze_route` direto por `route_id`. 4 testes, validado contra oferta real do Supabase (`offer-rec-001` → score 100/EXCELLENT).
 - [x] FASE 7 — `GET /flights/price-intelligence/{offer_id}?price=X`: 404 amigável pra oferta sem histórico, validação de `price`, 4 testes de API. Achou e corrigiu um bug real de teste (SQLite `:memory:` isolado por thread no `TestClient` — `StaticPool` resolveu).
 - [x] FASE 8 — Frontend: `features/price-intelligence/` (hook, view de análise com badge/explicação/stats/confiança, gráfico SVG próprio sem lib), integrado no detalhe da oferta. `history` (série bruta) adicionado ao schema pra viabilizar o gráfico, que o `PRICE_INTELLIGENCE.md` original não previa. Achou e corrigiu mais um bug real de teste (SQLite `:memory:` isolado por thread no `TestClient`). 3 testes de hook novos, validado visualmente (desktop+mobile) contra o Supabase real — R$429 (mínimo já visto) → 🟢 Excelente oportunidade, gráfico renderizando o histórico de verdade.
-- [ ] FASE 9 em diante — integração final, testes de regressão completos, auditoria, documentação, release `v0.3.0`.
+- [x] FASE 9 — integração confirmada (suite inteira verde, frontend não duplica lógica de negócio do backend).
+- [x] FASE 10 — auditoria: regressão v0.2 (2/2 E2E), responsividade, console/network limpos, migrations íntegras, secrets fora do Git. Achou e corrigiu um bug real (`price=inf`/`nan` derrubava a API com 500 cru — corrigido com `allow_inf_nan=False` + teto de valor).
+- [x] FASE 11 — documentação (este arquivo, README, PROJECT_CONTEXT, `docs/v0.3/`).
+- [x] FASE 12 — release `v0.3.0`.
 
 ## Próximo
 
-- [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`) — primeira vez que o projeto conecta banco de dados (v0.3).
+- [ ] Admin padrão (`rhoneyinc@gmail.com`) no Supabase do Voa Radar — o banco já está conectado (v0.3), mas provisionamento de admin/auth ainda não, por ser território de login (fora do escopo até v1.0, ver [[voaradar_admin_login_pattern]] na memória do projeto).
 - [ ] Deploy (Vercel) — frontend e backend. **Lembrete da auditoria**: `CORS_ORIGINS` no backend hoje só libera `http://localhost:5173` — precisa incluir o domínio real no deploy, senão o frontend em produção não consegue falar com a API (testado: o build de produção rodando em outra porta local já é bloqueado por CORS).
 - [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox, ou outro — decisão adiada por instabilidade recente sinalizada no acesso self-service do Amadeus, ver `docs/v0.3/DECISIONS.md` DEC-009).
 - [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).

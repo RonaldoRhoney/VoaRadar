@@ -101,3 +101,9 @@ O `PRICE_INTELLIGENCE.md` original só especificava estatísticas agregadas (mí
 ## DEC-020 — Rótulos de classificação/confiança (não especificados literalmente no PRD)
 
 O PRD dava só o exemplo "🟢 Boa oportunidade" pra `GOOD`. Defini os demais: `EXCELLENT`="🟢 Excelente oportunidade", `NORMAL`="🟡 Preço normal", `EXPENSIVE`="🟠 Acima da média", `VERY_EXPENSIVE`="🔴 Preço alto". Confiança seguiu literal o `UX.md` §7 (🟢/🟡/⚪).
+
+## Problema encontrado e corrigido — FASE 10 (auditoria)
+
+`GET /flights/price-intelligence/{offer_id}?price=inf` (ou `nan`) derrubava a API com `500 Internal Server Error` cru — violação direta da seção 15 do `CLAUDE.md` (nunca expor erro técnico). Causa: `Query(..., gt=0)` aceita `inf` (matematicamente `inf > 0` é verdadeiro) e `nan` só é barrado por acidente em alguns casos; o valor seguia até `_score_from_position()`, onde `round((1 - inf) * 100)` lança `OverflowError` (Python não converte infinito pra `int`).
+
+**Solução**: `Query(..., gt=0, lt=1_000_000, allow_inf_nan=False, ...)` — rejeita `inf`/`nan`/`-inf` na validação (422, mensagem estruturada do Pydantic) e limita a um teto realista de preço. 2 testes novos cobrindo `inf`/`-inf`/`nan` e valor acima do limite. Achado testando deliberadamente valores extremos na auditoria, não apareceu em nenhum teste "feliz" anterior.

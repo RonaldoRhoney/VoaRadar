@@ -12,7 +12,7 @@ STATUS: CONCLUÍDA (tag `v0.2.0`)
 
 ## v0.3 — Price Intelligence
 
-STATUS: EM ANDAMENTO — FASE 1 a 8 concluídas (schema, conexão real, repository, coleta de histórico, analytics engine, price intelligence service, endpoint da API, frontend — todos testados e validados contra dado real no Supabase, com capturas visuais)
+STATUS: CONCLUÍDA (tag `v0.3.0`) — todas as 13 fases do `IMPLEMENTATION.md` fechadas: schema, conexão real, repository, coleta de histórico, analytics engine, price intelligence service, endpoint da API, frontend, integração, auditoria (achou e corrigiu um bug real de validação), documentação e release. Ver [../../ROADMAP.md](../../ROADMAP.md) para o detalhe de cada fase.
 
 Objetivo: entender se o preço encontrado representa uma boa oportunidade em relação ao histórico disponível.
 

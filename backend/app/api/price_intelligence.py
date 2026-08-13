@@ -14,7 +14,13 @@ FRIENDLY_NOT_FOUND = "Ainda não temos histórico de preço para esta oferta."
 @router.get("/price-intelligence/{offer_id}", response_model=PriceIntelligence)
 def get_price_intelligence(
     offer_id: str,
-    price: float = Query(..., gt=0, description="Preço atual da oferta, a ser comparado com o histórico."),
+    price: float = Query(
+        ...,
+        gt=0,
+        lt=1_000_000,
+        allow_inf_nan=False,
+        description="Preço atual da oferta, a ser comparado com o histórico.",
+    ),
     db: Session = Depends(get_db),
 ):
     service = PriceIntelligenceService(PriceHistoryRepository(db))

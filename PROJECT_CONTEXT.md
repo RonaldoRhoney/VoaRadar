@@ -32,7 +32,7 @@ Posicionamento: **"Seu radar para viajar pagando menos."**
 
 - **v0.1** — Fundação + interface + busca com mock data. ✅ Concluída (tag `v0.1.0`).
 - **v0.2** — Explorar destinos (múltiplas ofertas, filtros, ordenação). ✅ Concluída (tag `v0.2.0`).
-- **v0.3** — Price Intelligence: histórico e análise de preços, Postgres via Supabase. 🚧 Em planejamento (fase atual).
+- **v0.3** — Price Intelligence: histórico e análise de preços, Postgres via Supabase. 🚧 Em fechamento (fase atual) — schema, coleta, motor de análise, API e frontend prontos e validados contra dado real.
 - **v0.4** — Radar / Alertas.
 - **v0.5** — Inteligência (IA/recomendações).
 - **v1.0** — Plataforma pública.
@@ -46,4 +46,6 @@ Vender diretamente passagens no MVP; fingir que possui dados reais quando não p
 
 ## Estado atual
 
-v0.1 e v0.2 concluídas: exploração de destinos por orçamento, múltiplas ofertas por destino, filtros e ordenação, tudo com **dados mock** (frontend e backend), claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda. v0.3 em andamento: Supabase (Postgres) conectado, schema de histórico de preços já aplicado (`airports`, `airlines`, `routes`, `flight_observations`, `price_snapshots`) — ainda sem dado nenhum persistido, motor de análise por vir. Detalhe completo em [ROADMAP.md](ROADMAP.md), [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/) e [docs/v0.3/](docs/v0.3/).
+v0.1 e v0.2 concluídas: exploração de destinos por orçamento, múltiplas ofertas por destino, filtros e ordenação, tudo com **dados mock** (frontend e backend), claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda.
+
+v0.3 em fechamento: Supabase (Postgres) conectado e populado com histórico de exemplo; motor de Price Intelligence (mínimo/máximo/média/mediana/score/confiança, estatística transparente, sem fabricar inteligência) funcionando de ponta a ponta — API (`GET /flights/price-intelligence/{offer_id}`) e frontend (badge de oportunidade, explicação, gráfico de histórico) validados contra dado real no Supabase. Detalhe completo em [ROADMAP.md](ROADMAP.md), [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/) e [docs/v0.3/](docs/v0.3/).

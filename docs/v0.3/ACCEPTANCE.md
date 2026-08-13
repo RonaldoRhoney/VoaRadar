@@ -67,20 +67,21 @@
 
 ## Regressão
 
-- [ ] v0.2 continua funcionando.
+- [x] v0.2 continua funcionando (2/2 E2E, fluxo completo Home → resultados → detalhe, sem erro de console).
 
 ## Segurança
 
-- [ ] Secrets fora do Git.
-- [ ] `.env.example` atualizado.
-- [ ] Credenciais não expostas.
+- [x] Secrets fora do Git (verificado no diff de cada commit da v0.3, incluindo o `DATABASE_URL` com senha).
+- [x] `.env.example` atualizado (`DATABASE_URL` com placeholder).
+- [x] Credenciais não expostas.
+- [x] Entrada validada contra XSS (`offer_id` com `<script>`), valores não-finitos (`inf`/`nan` — achado e corrigido nesta auditoria), preço fora de faixa realista, e tipo errado — tudo 404/422 estruturado, nunca 500 cru.
 
 ## Documentação
 
-- [ ] README.
-- [ ] Context.
-- [ ] Roadmap.
-- [ ] Decisions.
+- [x] README.
+- [x] Context.
+- [x] Roadmap.
+- [x] Decisions.
 
 ## Release
 

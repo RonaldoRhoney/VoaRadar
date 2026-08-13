@@ -57,3 +57,19 @@ def test_price_intelligence_requires_price_query_param(client, db_session):
     response = client.get("/flights/price-intelligence/offer-rec-001")
 
     assert response.status_code == 422
+
+
+def test_price_intelligence_rejects_non_finite_price(client, db_session):
+    _seed_offer(db_session, "offer-rec-003", [399, 620])
+
+    for value in ["inf", "-inf", "nan"]:
+        response = client.get("/flights/price-intelligence/offer-rec-003", params={"price": value})
+        assert response.status_code == 422, f"price={value} deveria ser rejeitado"
+
+
+def test_price_intelligence_rejects_unrealistically_high_price(client, db_session):
+    _seed_offer(db_session, "offer-rec-004", [399, 620])
+
+    response = client.get("/flights/price-intelligence/offer-rec-004", params={"price": 9_999_999})
+
+    assert response.status_code == 422
