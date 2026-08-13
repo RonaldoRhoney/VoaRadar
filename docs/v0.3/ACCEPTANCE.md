@@ -75,6 +75,8 @@
 - [x] `.env.example` atualizado (`DATABASE_URL` com placeholder).
 - [x] Credenciais não expostas.
 - [x] Entrada validada contra XSS (`offer_id` com `<script>`), valores não-finitos (`inf`/`nan` — achado e corrigido nesta auditoria), preço fora de faixa realista, e tipo errado — tudo 404/422 estruturado, nunca 500 cru.
+- [x] RLS habilitado nas 5 tabelas + grants de `anon`/`authenticated` revogados (achado crítico: acesso público de leitura/escrita/exclusão direto pelo Supabase, sem passar pelo backend — ver [AUDIT_SECURITY.md](AUDIT_SECURITY.md)).
+- [x] Regras de negócio confirmadas centralizadas no backend — nenhum cálculo de score/classificação/orçamento no frontend.
 
 ## Documentação
 

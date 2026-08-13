@@ -50,6 +50,10 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] FASE 11 — documentação (este arquivo, README, PROJECT_CONTEXT, `docs/v0.3/`).
 - [x] FASE 12 — release `v0.3.0`.
 
+## Pós-release v0.3.0 — auditoria de segurança (RLS + permissões)
+
+**Achado crítico corrigido**: nenhuma tabela tinha Row Level Security habilitado, e `anon`/`authenticated` (papéis da API REST pública do Supabase) tinham `SELECT/INSERT/UPDATE/DELETE/TRUNCATE` liberados em todas as 5 tabelas — qualquer pessoa com a chave `anon` pública conseguia ler ou apagar o histórico de preço direto pelo Supabase, sem passar pelo backend. Corrigido com a migration `0002` (RLS habilitado + grants revogados nas 5 tabelas), sem nenhum efeito no backend (que acessa como dono da tabela, `rolbypassrls=true`). Regras de negócio reauditadas: confirmado que score/classificação/status de orçamento só existem no backend, frontend só filtra/ordena o que já vem calculado. Detalhe completo em [docs/v0.3/AUDIT_SECURITY.md](docs/v0.3/AUDIT_SECURITY.md) e `docs/v0.3/DECISIONS.md` DEC-021.
+
 ## Próximo
 
 - [ ] Admin padrão (`rhoneyinc@gmail.com`) no Supabase do Voa Radar — o banco já está conectado (v0.3), mas provisionamento de admin/auth ainda não, por ser território de login (fora do escopo até v1.0, ver [[voaradar_admin_login_pattern]] na memória do projeto).

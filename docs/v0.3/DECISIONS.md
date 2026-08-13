@@ -107,3 +107,11 @@ O PRD dava só o exemplo "🟢 Boa oportunidade" pra `GOOD`. Defini os demais: `
 `GET /flights/price-intelligence/{offer_id}?price=inf` (ou `nan`) derrubava a API com `500 Internal Server Error` cru — violação direta da seção 15 do `CLAUDE.md` (nunca expor erro técnico). Causa: `Query(..., gt=0)` aceita `inf` (matematicamente `inf > 0` é verdadeiro) e `nan` só é barrado por acidente em alguns casos; o valor seguia até `_score_from_position()`, onde `round((1 - inf) * 100)` lança `OverflowError` (Python não converte infinito pra `int`).
 
 **Solução**: `Query(..., gt=0, lt=1_000_000, allow_inf_nan=False, ...)` — rejeita `inf`/`nan`/`-inf` na validação (422, mensagem estruturada do Pydantic) e limita a um teto realista de preço. 2 testes novos cobrindo `inf`/`-inf`/`nan` e valor acima do limite. Achado testando deliberadamente valores extremos na auditoria, não apareceu em nenhum teste "feliz" anterior.
+
+## DEC-021 — RLS habilitado + grants de anon/authenticated revogados (achado crítico)
+
+Auditoria dedicada de segurança (pedida pelo usuário, não parte do plano original da v0.3) encontrou RLS desabilitado em todas as 5 tabelas, com `anon`/`authenticated` tendo `SELECT/INSERT/UPDATE/DELETE/TRUNCATE` liberados — qualquer pessoa com a chave `anon` pública do Supabase conseguia ler ou apagar o histórico de preço direto pela API REST do Supabase, sem passar pelo backend. Detalhe completo em [AUDIT_SECURITY.md](AUDIT_SECURITY.md).
+
+**Correção**: migration `0002` habilita RLS + revoga os grants nas 5 tabelas. O backend conecta como dono da tabela (`rolbypassrls=true`, confirmado via `pg_roles`) — nenhum efeito no funcionamento da aplicação, só bloqueia acesso de fora do backend. Nenhuma policy criada de propósito: hoje não existe nenhum caso de uso de acesso direto ao banco fora do backend, então o padrão é negar tudo pra `anon`/`authenticated`, não abrir acesso condicional.
+
+**Auditoria de regras de negócio** (mesma sessão): confirmado por busca no código que nenhum cálculo de score/classificação/status de orçamento existe no frontend — `features/explore/exploreFilters.ts` só filtra/ordena a lista já calculada pelo backend, não recalcula nada. Ver `AUDIT_SECURITY.md` para o detalhe.
