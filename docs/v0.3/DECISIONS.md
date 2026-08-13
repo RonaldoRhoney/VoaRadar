@@ -39,3 +39,9 @@ O backend é responsável pela inteligência; o frontend só apresenta.
 ## DEC-013 — Banco de dados via Supabase (não Postgres genérico/Docker local)
 
 **Motivo**: decisão do usuário — consistente com o padrão já usado por todo o resto do ecossistema RhoneyInc (MeuPet, MenuFlex, AmaVida...). Resolve a pendência em aberto desde a auditoria da v0.1 (`docs/AUDIT_V0.1.md`, seção "Pendências") sobre onde/como conectar banco de dados.
+
+## Problema encontrado e corrigido — FASE 2 (conexão real)
+
+`alembic upgrade head` falhava com `ValueError: invalid interpolation syntax` ao processar a `DATABASE_URL`. Causa: a senha do banco tem caracteres especiais (`@`) percent-encoded como `%40`, e `Config.set_main_option()` do Alembic passa o valor pelo `configparser`, que interpreta `%` como início de sintaxe de interpolação (`%(nome)s`).
+
+**Solução**: `alembic/env.py` deixou de usar `config.set_main_option("sqlalchemy.url", ...)` + `engine_from_config` (que dependem do `configparser`) e passou a criar a engine diretamente com `sqlalchemy.create_engine(DATABASE_URL, ...)`, lendo a URL direto de `app.core.config` — nunca mais passa pelo parser de `.ini`. Testado de ponta a ponta: `upgrade head` → 5 tabelas criadas no Supabase real → `downgrade -1` limpa tudo → `upgrade head` reaplica sem erro.

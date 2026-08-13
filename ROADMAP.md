@@ -35,7 +35,11 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 ## v0.3 — Price Intelligence
 
-**STATUS: EM PLANEJAMENTO** — documentação completa em [docs/v0.3/](docs/v0.3/). Objetivo: "esse preço é realmente bom?" — histórico de preços persistido via Supabase, motor de análise (média/mediana/mínimo/máximo/score/confiança) transparente, sem fabricar inteligência artificial. Execução por fases, ver [docs/v0.3/IMPLEMENTATION.md](docs/v0.3/IMPLEMENTATION.md).
+**STATUS: EM ANDAMENTO** — documentação completa em [docs/v0.3/](docs/v0.3/). Objetivo: "esse preço é realmente bom?" — histórico de preços persistido via Supabase, motor de análise (média/mediana/mínimo/máximo/score/confiança) transparente, sem fabricar inteligência artificial. Execução por fases, ver [docs/v0.3/IMPLEMENTATION.md](docs/v0.3/IMPLEMENTATION.md).
+
+- [x] FASE 1 — modelo de dados (`Airport`, `Airline`, `Route`, `FlightObservation`, `PriceSnapshot`) + migration inicial.
+- [x] FASE 2 — conectado ao Supabase real, migration aplicada (5 tabelas), rollback testado.
+- [ ] FASE 3 em diante — repository, coleta de histórico, analytics engine, API, frontend.
 
 ## Próximo
 

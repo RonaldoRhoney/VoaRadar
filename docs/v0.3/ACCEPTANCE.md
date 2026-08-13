@@ -2,10 +2,10 @@
 
 ## Banco
 
-- [ ] Supabase/PostgreSQL configurado.
-- [ ] Migration funcionando.
-- [ ] Rollback testado.
-- [ ] Dados persistidos.
+- [x] Supabase/PostgreSQL configurado.
+- [x] Migration funcionando (`alembic upgrade head` aplicado no projeto real).
+- [x] Rollback testado (`alembic downgrade -1` limpa tudo, `upgrade head` reaplica sem erro).
+- [ ] Dados persistidos (schema criado; nenhum dado gravado ainda — entra na FASE 3/4).
 
 ## Histórico
 
