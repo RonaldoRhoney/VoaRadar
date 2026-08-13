@@ -33,10 +33,10 @@
 
 ## API
 
-- [ ] Endpoint funcionando.
-- [ ] Schema validado.
-- [ ] Erros tratados.
-- [ ] Dados normalizados.
+- [x] Endpoint funcionando (`GET /flights/price-intelligence/{offer_id}?price=X`, validado ao vivo contra o Supabase real).
+- [x] Schema validado (`price` obrigatório e `> 0`, 422 caso contrário).
+- [x] Erros tratados (oferta sem histórico → 404 com mensagem amigável, nunca 500 cru).
+- [x] Dados normalizados (resposta é o schema `PriceIntelligence`, nunca expõe modelo interno do banco).
 
 ## Frontend
 

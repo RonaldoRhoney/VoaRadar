@@ -75,3 +75,13 @@ Confirmada na análise A–K da FASE 2 (proposta na seção F), implementada e t
 `sample_size == 0` é o único caso que zera as estatísticas (`has_sufficient_data=False`). Com 1+ observações, o motor calcula normalmente (mínimo/máximo/média/score), só marca `confidence=LOW` quando `sample_size < 10`.
 
 **Motivo**: `UX.md` §3 mostra o exemplo "Ainda estamos aprendendo esta rota — 8 observações", ou seja, ainda mostra os dados junto do aviso de confiança baixa — não esconde o número, hedgeia a linguagem. Essa interpretação foi registrada aqui porque o `PRICE_INTELLIGENCE.md` §11 poderia ser lido como "não calcular nada com poucos dados"; optei pela leitura mais fiel ao UX.md.
+
+## Problema encontrado e corrigido — FASE 7 (testes de API)
+
+Os testes de `GET /flights/price-intelligence/{offer_id}` falhavam com `no such table: flight_observations`, mesmo com os dados semeados no mesmo `db_session` do teste. Causa: o `TestClient` do FastAPI roda rotas síncronas numa thread de worker (via threadpool do Starlette), e `sqlite:///:memory:` isola o banco por conexão — cada conexão nova (inclusive de outra thread) enxerga um banco vazio, mesmo dentro do "mesmo" `:memory:`.
+
+**Solução**: engine de teste passou a usar `poolclass=StaticPool` + `connect_args={"check_same_thread": False}`, forçando todas as conexões (não importa a thread) a compartilhar a mesma conexão/banco em memória. Fixture `client` em `conftest.py` sobrescreve `get_db` pra usar esse mesmo `db_session` via `app.dependency_overrides`.
+
+## Endpoint
+
+`GET /flights/price-intelligence/{offer_id}?price=X` — sem prefixo `/api/v1/` (DEC confirmada na FASE 2), `price` obrigatório e validado (`gt=0`), 404 amigável quando a oferta não tem histórico coletado. Validado ao vivo contra o Supabase real (`offer-rec-001` → score 100/EXCELLENT).
