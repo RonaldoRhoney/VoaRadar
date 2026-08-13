@@ -5,7 +5,7 @@
 - [x] Supabase/PostgreSQL configurado.
 - [x] Migration funcionando (`alembic upgrade head` aplicado no projeto real).
 - [x] Rollback testado (`alembic downgrade -1` limpa tudo, `upgrade head` reaplica sem erro).
-- [ ] Dados persistidos (schema criado; nenhum dado gravado ainda — entra na FASE 3/4).
+- [x] Dados persistidos (checkbox estava desatualizado — confirmado agora: 5 airports, 3 airlines, 4 routes, 9 flight_observations, 18 price_snapshots no Supabase real).
 
 ## Histórico
 
@@ -29,7 +29,7 @@
 - [x] Score determinístico (mesmo input → mesmo output, testado).
 - [x] Dados insuficientes tratados (0 observações → `has_sufficient_data=False`; poucas observações → stats calculadas normalmente, mas `confidence=LOW`).
 - [x] Sem previsão de futuro.
-- [ ] Sem afirmações enganosas.
+- [x] Sem afirmações enganosas (verificado: grep por "compre agora"/"vai subir"/"menor preço do mercado" — zero ocorrências; texto sempre inclui "Análise baseada no histórico disponível pelo Voa Radar").
 
 ## API
 
@@ -60,10 +60,10 @@
 
 ## Testes
 
-- [ ] Unitários.
-- [ ] Integração.
-- [ ] API.
-- [ ] E2E.
+- [x] Unitários (analytics engine, 14 testes puros).
+- [x] Integração (repository + collector contra SQLite, 10 testes).
+- [x] API (endpoint de price-intelligence, 6 testes incluindo validação de `inf`/`nan`).
+- [x] E2E (checkbox estava desatualizado — só existia validação manual avulsa; teste comitado agora em `tests/e2e/explore-search.spec.ts`, 3/3 passando).
 
 ## Regressão
 
@@ -87,6 +87,8 @@
 
 ## Release
 
-- [ ] Commit.
-- [ ] Tag `v0.3.0`.
-- [ ] Push.
+- [x] Commit.
+- [x] Tag `v0.3.0`.
+- [x] Push.
+
+> Nota: 2 commits de segurança (`b36e624`, `a7c698b`) entraram **depois** da tag `v0.3.0` — o código em `main` está mais seguro do que o commit que a tag aponta. Ver pergunta ao usuário sobre cortar `v0.3.1`.
