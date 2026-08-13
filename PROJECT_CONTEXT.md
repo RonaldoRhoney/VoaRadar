@@ -16,8 +16,8 @@ A experiência de entrada não é "origem + destino + data" (padrão de mercado)
 
 - Frontend: React + TypeScript + Vite + Tailwind.
 - Backend: API própria (FastAPI), estrutura modular.
-- Deploy: Vercel (projeto próprio).
-- Dados/Auth: Supabase dedicado (a provisionar).
+- Deploy: Vercel (projeto próprio, a fazer).
+- Dados/Auth: Supabase dedicado — entra na v0.3 (ver [docs/v0.3/DECISIONS.md](docs/v0.3/DECISIONS.md) DEC-013).
 - Rodapé, admin padrão e demais convenções: skills `footer-padrao` e `admin-padrao` do ecossistema.
 
 ## Origem e propósito
@@ -30,11 +30,11 @@ Posicionamento: **"Seu radar para viajar pagando menos."**
 
 ## Visão de evolução
 
-- **v0.1** — Fundação + interface + busca com mock data (fase atual).
-- **v0.2** — Explorar destinos.
-- **v0.3** — Histórico e análise de preços.
-- **v0.4** — Alertas.
-- **v0.5** — Inteligência (IA).
+- **v0.1** — Fundação + interface + busca com mock data. ✅ Concluída (tag `v0.1.0`).
+- **v0.2** — Explorar destinos (múltiplas ofertas, filtros, ordenação). ✅ Concluída (tag `v0.2.0`).
+- **v0.3** — Price Intelligence: histórico e análise de preços, Postgres via Supabase. 🚧 Em planejamento (fase atual).
+- **v0.4** — Radar / Alertas.
+- **v0.5** — Inteligência (IA/recomendações).
 - **v1.0** — Plataforma pública.
 - **Futuro** — PWA e Android nativo.
 
@@ -46,4 +46,4 @@ Vender diretamente passagens no MVP; fingir que possui dados reais quando não p
 
 ## Estado atual
 
-MVP visual da tela principal (orçamento → destinos → oportunidade) construído com **dados mock**, tanto no frontend quanto no backend — claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda. Detalhe completo e atualizado em [ROADMAP.md](ROADMAP.md) e [docs/v0.1/DECISIONS.md](docs/v0.1/DECISIONS.md).
+v0.1 e v0.2 concluídas: exploração de destinos por orçamento, múltiplas ofertas por destino, filtros e ordenação, tudo com **dados mock** (frontend e backend), claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda; nenhum banco de dados ainda (entra na v0.3). Detalhe completo em [ROADMAP.md](ROADMAP.md), [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/) e [docs/v0.3/](docs/v0.3/) (em planejamento).

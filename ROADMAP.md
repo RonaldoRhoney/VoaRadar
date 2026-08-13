@@ -1,6 +1,6 @@
 # Roadmap — Voa Radar
 
-Este arquivo é o log de execução da **v0.1 e v0.2** (o que foi feito, passo a passo). Documentação completa por versão em [docs/v0.1/](docs/v0.1/) e [docs/v0.2/](docs/v0.2/) (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões — mesmo formato nos dois). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
+Este arquivo é o log de execução do projeto (o que foi feito, passo a passo). Documentação completa por versão em [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/) e [docs/v0.3/](docs/v0.3/) (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões — mesmo formato em todas). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
 
 ## v0.1 — Fundação + interface + busca com mock data
 
@@ -33,14 +33,18 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 **v0.2 está funcionalmente fechada**, ainda 100% mock, sem deploy.
 
+## v0.3 — Price Intelligence
+
+**STATUS: EM PLANEJAMENTO** — documentação completa em [docs/v0.3/](docs/v0.3/). Objetivo: "esse preço é realmente bom?" — histórico de preços persistido via Supabase, motor de análise (média/mediana/mínimo/máximo/score/confiança) transparente, sem fabricar inteligência artificial. Execução por fases, ver [docs/v0.3/IMPLEMENTATION.md](docs/v0.3/IMPLEMENTATION.md).
+
 ## Próximo
 
+- [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`) — primeira vez que o projeto conecta banco de dados (v0.3).
 - [ ] Deploy (Vercel) — frontend e backend. **Lembrete da auditoria**: `CORS_ORIGINS` no backend hoje só libera `http://localhost:5173` — precisa incluir o domínio real no deploy, senão o frontend em produção não consegue falar com a API (testado: o build de produção rodando em outra porta local já é bloqueado por CORS).
-- [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`).
-- [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox).
-- [ ] Histórico e análise de preços (v0.3) — inclui calendário completo de flexibilidade de datas (DEC-008).
+- [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox, ou outro — decisão adiada por instabilidade recente sinalizada no acesso self-service do Amadeus, ver `docs/v0.3/DECISIONS.md` DEC-009).
+- [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
 - [ ] Alertas (v0.4).
-- [ ] Inteligência artificial (v0.5).
+- [ ] Inteligência artificial / recomendações (v0.5).
 
 ## Sugestões futuras registradas (não implementadas)
 
