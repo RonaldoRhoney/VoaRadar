@@ -35,7 +35,7 @@ Data: 2026-08-12. Escopo: todos os arquivos do projeto (`frontend/`, `backend/`,
 
 ## Pendências (não resolvidas, registradas conscientemente)
 
-- **Banco de dados**: ainda não conectado — decisão de escopo em aberto com o usuário (mover só os destinos mock pro Postgres/Supabase vs. guardar histórico de busca vs. outra coisa). Ver [docs/DECISIONS.md](DECISIONS.md).
+- **Banco de dados**: ainda não conectado — decisão de escopo em aberto com o usuário (mover só os destinos mock pro Postgres/Supabase vs. guardar histórico de busca vs. outra coisa). Ver [docs/v0.1/DECISIONS.md](v0.1/DECISIONS.md).
 - **Botão "Como Usar"**: pedido pelo usuário, ainda não implementado — falta definir o que "ajustado de acordo com o progresso do App" significa na prática antes de construir.
 - **Componentes React sem teste unitário próprio** (`BudgetSearchForm`, `Results`) — cobertos indiretamente pelo E2E, não por Testing Library isolado. Registrado como decisão aceita em sessão anterior (ver [DECISIONS.md](DECISIONS.md)), não um problema novo.
 - **`GitHub` não refletia o código mais recente** até esta sessão — corrigido: tudo commitado e enviado (`33514cc`, `HEAD` no momento desta auditoria).

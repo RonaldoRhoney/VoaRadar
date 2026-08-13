@@ -1,6 +1,6 @@
 # Roadmap — Voa Radar
 
-Este arquivo é o log de execução da **v0.1** (o que foi feito, passo a passo). Roadmap de versões (v0.1 → v1.0) em [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) e, com mais detalhe, em [docs/v0.2/ROADMAP.md](docs/v0.2/ROADMAP.md). Log de decisões/problemas em [docs/DECISIONS.md](docs/DECISIONS.md). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md). Planejamento completo da v0.2 em [docs/v0.2/](docs/v0.2/).
+Este arquivo é o log de execução da **v0.1 e v0.2** (o que foi feito, passo a passo). Documentação completa por versão em [docs/v0.1/](docs/v0.1/) e [docs/v0.2/](docs/v0.2/) (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões — mesmo formato nos dois). Auditoria completa da v0.1 em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
 
 ## v0.1 — Fundação + interface + busca com mock data
 

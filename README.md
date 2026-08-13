@@ -14,7 +14,7 @@ Produto RhoneyInc.
 | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | O que é o produto, público, visão v0.1→v1.0 |
 | [PRD.md](PRD.md) | Escopo da v0.1 |
 | [ROADMAP.md](ROADMAP.md) | Execução da v0.1 e v0.2, passo a passo |
-| [docs/DECISIONS.md](docs/DECISIONS.md) | Diário de decisões técnicas da v0.1 |
+| [docs/v0.1/](docs/v0.1/) | Documentação completa da v0.1 (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões) |
 | [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md) | Auditoria completa da v0.1 (testado, corrigido, pendências, riscos) |
 | [docs/v0.2/](docs/v0.2/) | Planejamento e decisões da v0.2 (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões) |
 

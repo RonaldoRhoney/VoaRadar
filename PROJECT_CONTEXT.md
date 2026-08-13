@@ -2,7 +2,7 @@
 
 ## O que é
 
-Voa Radar é um buscador/plataforma de passagens aéreas. Produto da RhoneyInc, usado também como projeto de portfólio — por isso arquitetura, decisões e problemas são documentados ao longo da construção, não só o resultado final (ver [docs/DECISIONS.md](docs/DECISIONS.md) e [ROADMAP.md](ROADMAP.md)).
+Voa Radar é um buscador/plataforma de passagens aéreas. Produto da RhoneyInc, usado também como projeto de portfólio — por isso arquitetura, decisões e problemas são documentados ao longo da construção, não só o resultado final (ver [docs/v0.1/DECISIONS.md](docs/v0.1/DECISIONS.md), [docs/v0.2/DECISIONS.md](docs/v0.2/DECISIONS.md) e [ROADMAP.md](ROADMAP.md)).
 
 ## Público
 
@@ -46,4 +46,4 @@ Vender diretamente passagens no MVP; fingir que possui dados reais quando não p
 
 ## Estado atual
 
-MVP visual da tela principal (orçamento → destinos → oportunidade) construído com **dados mock**, tanto no frontend quanto no backend — claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda. Detalhe completo e atualizado em [ROADMAP.md](ROADMAP.md) e [docs/DECISIONS.md](docs/DECISIONS.md).
+MVP visual da tela principal (orçamento → destinos → oportunidade) construído com **dados mock**, tanto no frontend quanto no backend — claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda. Detalhe completo e atualizado em [ROADMAP.md](ROADMAP.md) e [docs/v0.1/DECISIONS.md](docs/v0.1/DECISIONS.md).

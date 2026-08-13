@@ -1,6 +1,6 @@
 # Voa Radar — Instruções para Claude Code
 
-> Documentação por versão: os documentos abaixo (PRD, PROJECT_CONTEXT, ROADMAP) descrevem o projeto como um todo. Planejamento específico de cada versão em desenvolvimento fica em `docs/v{X.Y}/` — hoje, [docs/v0.2/](docs/v0.2/) (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões). A auditoria da v0.1 está em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
+> Documentação por versão: os documentos abaixo (PRD, PROJECT_CONTEXT, ROADMAP) descrevem o projeto como um todo. Detalhe de cada versão fica em `docs/v{X.Y}/` — [docs/v0.1/](docs/v0.1/) e [docs/v0.2/](docs/v0.2/), ambos com o mesmo formato (Contexto, PRD, UX, Arquitetura, Implementação, Critérios de aceite, Roadmap, Decisões). A auditoria completa da v0.1 está em [docs/AUDIT_V0.1.md](docs/AUDIT_V0.1.md).
 
 ## 1. Identidade do projeto
 
