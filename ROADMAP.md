@@ -35,7 +35,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 ## Próximo
 
-- [ ] Deploy (Vercel) — frontend e backend.
+- [ ] Deploy (Vercel) — frontend e backend. **Lembrete da auditoria**: `CORS_ORIGINS` no backend hoje só libera `http://localhost:5173` — precisa incluir o domínio real no deploy, senão o frontend em produção não consegue falar com a API (testado: o build de produção rodando em outra porta local já é bloqueado por CORS).
 - [ ] Provisionar Supabase dedicado + admin padrão (`rhoneyinc@gmail.com`).
 - [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox).
 - [ ] Histórico e análise de preços (v0.3) — inclui calendário completo de flexibilidade de datas (DEC-008).

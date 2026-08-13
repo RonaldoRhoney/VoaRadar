@@ -46,7 +46,7 @@ export function Footer() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-[22px] text-xs text-white/55">
           <span>© {year} Voa Radar — um produto RhoneyInc. Todos os direitos reservados.</span>
-          <span className="font-mono">rhoneyinc.com/voaradar</span>
+          <span className="font-mono">voaradar.rhoneyinc.com</span>
         </div>
       </div>
     </footer>

@@ -6,7 +6,7 @@
 
 Você está trabalhando no **Voa Radar**, produto da **RhoneyInc**.
 
-> Nota: a versão deste documento fornecida pelo usuário em 2026-08-12 dizia "Roney Inc." em vez de "RhoneyInc" em uma seção (inconsistente com a própria seção 23 do documento). Sinalizado ao usuário, que confirmou **RhoneyInc** como o nome correto — consistente com o resto do ecossistema (footer, domínio `rhoneyinc.com/voaradar`, demais produtos-irmãos). Resolvido, não é mais um conflito em aberto.
+> Nota: a versão deste documento fornecida pelo usuário em 2026-08-12 dizia "Roney Inc." em vez de "RhoneyInc" em uma seção (inconsistente com a própria seção 23 do documento). Sinalizado ao usuário, que confirmou **RhoneyInc** como o nome correto — consistente com o resto do ecossistema (footer, domínio `voaradar.rhoneyinc.com`, demais produtos-irmãos). Resolvido, não é mais um conflito em aberto.
 
 O Voa Radar é uma plataforma de tecnologia voltada à descoberta de oportunidades de viagens aéreas.
 

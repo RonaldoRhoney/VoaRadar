@@ -61,7 +61,7 @@ A v0.2 somente será considerada concluída quando:
 ## Qualidade
 
 - [x] Sem erros no console. (verificado via asserção no E2E e capturas manuais)
-- [x] Sem chamadas duplicadas desnecessárias. (uma chamada por busca, com cancelamento em unmount)
+- [x] Sem chamadas duplicadas desnecessárias. (uma chamada por busca em produção, verificado via build+preview; em `npm run dev` o `StrictMode` do React dispara o efeito duas vezes de propósito — comportamento só de desenvolvimento, inofensivo aqui porque o cancelamento evita atualizar o estado duas vezes, mas registrado pra não confundir com bug real)
 - [x] Sem dados mock apresentados como reais. ("dados de exemplo (mock)" visível em toda tela de resultado)
 - [x] Sem secrets no código.
 - [x] Sem regressão da v0.1. (suíte inteira migrada e verde, nenhum comportamento válido perdido)

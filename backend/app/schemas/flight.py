@@ -43,6 +43,9 @@ class ExploreRequest(BaseModel):
     budget: float = Field(gt=0)
     month: str = Field(min_length=1)
     flexible: bool = True
+    # Coletado e devolvido em `search` (SearchSummary), mas ainda não afeta
+    # preço/disponibilidade — MockFlightProvider não tem noção de ocupação.
+    # Passa a valer quando um provider real for integrado.
     passengers: int = Field(default=1, ge=1)
 
 
