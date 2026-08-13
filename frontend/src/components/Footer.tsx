@@ -16,10 +16,33 @@ export function Footer() {
               Uma conta. Todos os softwares.
             </span>
             <div className="mt-4 flex gap-2.5">
-              <a href="#" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm">📷</a>
-              <a href="#" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm">🎵</a>
-              <a href="#" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm">💬</a>
-              <a href="#" className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm">▶️</a>
+              <a
+                href="https://github.com/RonaldoRhoney"
+                target="_blank"
+                rel="noopener"
+                aria-label="GitHub"
+                className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm"
+              >
+                💻
+              </a>
+              <a
+                href="https://www.instagram.com/ronaldorhoney"
+                target="_blank"
+                rel="noopener"
+                aria-label="Instagram"
+                className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm"
+              >
+                📷
+              </a>
+              <a
+                href="https://www.linkedin.com/in/ronaldomartinsrhoney/"
+                target="_blank"
+                rel="noopener"
+                aria-label="LinkedIn"
+                className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white/8 text-sm"
+              >
+                💼
+              </a>
             </div>
           </div>
 
