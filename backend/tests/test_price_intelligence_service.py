@@ -35,6 +35,8 @@ def test_analyze_route_combines_history_and_analytics(db_session):
 
     assert result.has_sufficient_data is True
     assert result.minimum == 399
+    assert sorted(p.price for p in result.history) == [399.0, 620.0, 890.0]
+    assert result.history == sorted(result.history, key=lambda p: p.observed_at)
     assert result.score == 100
     assert result.classification == "EXCELLENT"
 

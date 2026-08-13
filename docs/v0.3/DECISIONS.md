@@ -85,3 +85,19 @@ Os testes de `GET /flights/price-intelligence/{offer_id}` falhavam com `no such 
 ## Endpoint
 
 `GET /flights/price-intelligence/{offer_id}?price=X` — sem prefixo `/api/v1/` (DEC confirmada na FASE 2), `price` obrigatório e validado (`gt=0`), 404 amigável quando a oferta não tem histórico coletado. Validado ao vivo contra o Supabase real (`offer-rec-001` → score 100/EXCELLENT).
+
+## DEC-018 — `history` (série bruta) entra no schema `PriceIntelligence`
+
+O `PRICE_INTELLIGENCE.md` original só especificava estatísticas agregadas (mínimo/máximo/média/mediana/score/confiança) como saída do motor — nada de série temporal. Mas o `UX.md` §5 e o `IMPLEMENTATION.md` FASE 8 pedem um gráfico de histórico, que precisa de pontos (preço + data), não só agregados.
+
+**Decisão**: `PriceIntelligenceService` busca a série bruta via `repository.get_price_history_points()` (novo método) e anexa em `PriceIntelligence.history`, separado das estatísticas — o `analytics.engine` continua recebendo só a lista de preços, sem saber de datas, mantendo-se puro. `history` só serve pro gráfico; a análise em si nunca depende dele.
+
+## DEC-019 — Gráfico em SVG próprio, sem biblioteca de charts
+
+`PriceHistoryChart.tsx` desenha um polyline + pontos à mão (viewBox fixo, sem eixo de escala além de min/máx do próprio histórico), com tooltip nativo via `<title>` do SVG — sem `recharts`/`chart.js`/etc.
+
+**Motivo**: consistente com o resto do frontend (sem dependências além do estritamente necessário — `exploreFilters.ts` também é lógica pura sem lib). Só aparece com 2+ pontos de histórico (com 1 ponto não há linha pra desenhar).
+
+## DEC-020 — Rótulos de classificação/confiança (não especificados literalmente no PRD)
+
+O PRD dava só o exemplo "🟢 Boa oportunidade" pra `GOOD`. Defini os demais: `EXCELLENT`="🟢 Excelente oportunidade", `NORMAL`="🟡 Preço normal", `EXPENSIVE`="🟠 Acima da média", `VERY_EXPENSIVE`="🔴 Preço alto". Confiança seguiu literal o `UX.md` §7 (🟢/🟡/⚪).

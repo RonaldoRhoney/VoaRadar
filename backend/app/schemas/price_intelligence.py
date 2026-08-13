@@ -1,9 +1,15 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel
 
 Classification = Literal["EXCELLENT", "GOOD", "NORMAL", "EXPENSIVE", "VERY_EXPENSIVE"]
 ConfidenceLevel = Literal["LOW", "MEDIUM", "HIGH"]
+
+
+class PriceHistoryPoint(BaseModel):
+    price: float
+    observed_at: datetime
 
 
 class PriceIntelligence(BaseModel):
@@ -20,3 +26,7 @@ class PriceIntelligence(BaseModel):
     percentage_vs_min: float | None = None
     score: int | None = None
     classification: Classification | None = None
+
+    # Só pro gráfico (UX.md §5) — a análise em si usa as estatísticas acima,
+    # não essa série crua.
+    history: list[PriceHistoryPoint] = []

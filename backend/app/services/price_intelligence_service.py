@@ -2,7 +2,7 @@ import uuid
 
 from app.analytics.engine import analyze_price
 from app.repositories.price_history_repository import PriceHistoryRepository
-from app.schemas.price_intelligence import PriceIntelligence
+from app.schemas.price_intelligence import PriceHistoryPoint, PriceIntelligence
 
 
 class PriceIntelligenceService:
@@ -14,7 +14,11 @@ class PriceIntelligenceService:
 
     def analyze_route(self, route_id: uuid.UUID, current_price: float) -> PriceIntelligence:
         history = self._repository.get_price_history(route_id)
-        return analyze_price(current_price, history)
+        result = analyze_price(current_price, history)
+
+        points = self._repository.get_price_history_points(route_id)
+        history_points = [PriceHistoryPoint(price=price, observed_at=observed_at) for price, observed_at in points]
+        return result.model_copy(update={"history": history_points})
 
     def analyze_offer(self, provider_offer_id: str, current_price: float) -> PriceIntelligence | None:
         """None quando a oferta não tem histórico associado ainda (nunca

@@ -40,23 +40,23 @@
 
 ## Frontend
 
-- [ ] Preço atual.
-- [ ] Média.
-- [ ] Mínimo.
-- [ ] Máximo.
-- [ ] Score.
-- [ ] Confiança.
-- [ ] Gráfico.
-- [ ] Explicação.
+- [x] Preço atual.
+- [x] Média.
+- [x] Mínimo.
+- [x] Máximo.
+- [x] Score.
+- [x] Confiança.
+- [x] Gráfico (SVG próprio, sem biblioteca — só aparece com 2+ pontos de histórico).
+- [x] Explicação ("O preço atual está X% em relação à média observada").
 
 ## UX
 
-- [ ] Mobile.
-- [ ] Desktop.
-- [ ] Loading.
-- [ ] Empty.
-- [ ] Error.
-- [ ] Dados insuficientes.
+- [x] Mobile (390px, validado).
+- [x] Desktop (1280px, validado).
+- [x] Loading (skeleton).
+- [x] Empty (oferta sem histórico → "ainda não temos dados suficientes", distinto de erro).
+- [x] Error (mensagem amigável, testado).
+- [x] Dados insuficientes (`confidence=LOW` → aviso "ainda estamos aprendendo esta rota", número não escondido).
 
 ## Testes
 

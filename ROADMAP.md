@@ -44,7 +44,8 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] FASE 5 — Analytics Engine (`app/analytics/`): mínimo/máximo/média/mediana/variação/score/confiança, puro e determinístico, 14 testes (fronteiras de score e confiança, outlier não distorce mediana, dados insuficientes). Validado contra o histórico real da rota BEL→REC (score 100/EXCELLENT pro preço mínimo já visto, confiança LOW com 6 observações).
 - [x] FASE 6 — `PriceIntelligenceService` (`app/services/`): combina repository + analytics engine; `analyze_offer(provider_offer_id, current_price)` resolve rota → histórico → análise, `analyze_route` direto por `route_id`. 4 testes, validado contra oferta real do Supabase (`offer-rec-001` → score 100/EXCELLENT).
 - [x] FASE 7 — `GET /flights/price-intelligence/{offer_id}?price=X`: 404 amigável pra oferta sem histórico, validação de `price`, 4 testes de API. Achou e corrigiu um bug real de teste (SQLite `:memory:` isolado por thread no `TestClient` — `StaticPool` resolveu).
-- [ ] FASE 8 em diante — frontend (Price Intelligence Card, view de análise, gráfico).
+- [x] FASE 8 — Frontend: `features/price-intelligence/` (hook, view de análise com badge/explicação/stats/confiança, gráfico SVG próprio sem lib), integrado no detalhe da oferta. `history` (série bruta) adicionado ao schema pra viabilizar o gráfico, que o `PRICE_INTELLIGENCE.md` original não previa. Achou e corrigiu mais um bug real de teste (SQLite `:memory:` isolado por thread no `TestClient`). 3 testes de hook novos, validado visualmente (desktop+mobile) contra o Supabase real — R$429 (mínimo já visto) → 🟢 Excelente oportunidade, gráfico renderizando o histórico de verdade.
+- [ ] FASE 9 em diante — integração final, testes de regressão completos, auditoria, documentação, release `v0.3.0`.
 
 ## Próximo
 

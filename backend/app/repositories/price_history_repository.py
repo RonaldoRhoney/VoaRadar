@@ -110,6 +110,18 @@ class PriceHistoryRepository:
         )
         return [float(price) for (price,) in rows]
 
+    def get_price_history_points(self, route_id: uuid.UUID) -> list[tuple[float, datetime]]:
+        """Preço + data de cada observação, ordenado no tempo — só pra
+        alimentar o gráfico (UX.md §5); a análise em si usa get_price_history."""
+        rows = (
+            self._session.query(PriceSnapshot.price, PriceSnapshot.observed_at)
+            .join(FlightObservation, PriceSnapshot.flight_observation_id == FlightObservation.id)
+            .filter(FlightObservation.route_id == route_id)
+            .order_by(PriceSnapshot.observed_at.asc())
+            .all()
+        )
+        return [(float(price), observed_at) for price, observed_at in rows]
+
     def find_route_id_by_provider_offer_id(self, provider_offer_id: str) -> uuid.UUID | None:
         observation = (
             self._session.query(FlightObservation)

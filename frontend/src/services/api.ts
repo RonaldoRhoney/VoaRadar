@@ -1,4 +1,5 @@
 import type { ExploreParams, ExploreResult, Offer, Destination } from "../types/flight";
+import type { PriceHistoryPoint, PriceIntelligence } from "../types/priceIntelligence";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
@@ -107,4 +108,74 @@ export async function exploreDestinations(params: ExploreParams): Promise<Explor
       cheapestPrice: body.metadata.cheapest_price,
     },
   };
+}
+
+interface PriceHistoryPointWire {
+  price: number;
+  observed_at: string;
+}
+
+interface PriceIntelligenceWire {
+  current_price: number;
+  sample_size: number;
+  confidence: "LOW" | "MEDIUM" | "HIGH";
+  has_sufficient_data: boolean;
+  minimum: number | null;
+  maximum: number | null;
+  mean: number | null;
+  median: number | null;
+  percentage_vs_mean: number | null;
+  percentage_vs_min: number | null;
+  score: number | null;
+  classification: "EXCELLENT" | "GOOD" | "NORMAL" | "EXPENSIVE" | "VERY_EXPENSIVE" | null;
+  history: PriceHistoryPointWire[];
+}
+
+function mapPriceIntelligence(body: PriceIntelligenceWire): PriceIntelligence {
+  const mapPoint = (point: PriceHistoryPointWire): PriceHistoryPoint => ({
+    price: point.price,
+    observedAt: point.observed_at,
+  });
+
+  return {
+    currentPrice: body.current_price,
+    sampleSize: body.sample_size,
+    confidence: body.confidence,
+    hasSufficientData: body.has_sufficient_data,
+    minimum: body.minimum,
+    maximum: body.maximum,
+    mean: body.mean,
+    median: body.median,
+    percentageVsMean: body.percentage_vs_mean,
+    percentageVsMin: body.percentage_vs_min,
+    score: body.score,
+    classification: body.classification,
+    history: body.history.map(mapPoint),
+  };
+}
+
+/** `null` = a oferta ainda não tem histórico coletado (404 da API) — não é
+ * erro, é um estado válido que a UI trata separado ("ainda sem dados"). */
+export async function fetchPriceIntelligence(
+  offerId: string,
+  currentPrice: number,
+): Promise<PriceIntelligence | null> {
+  let response: Response;
+  try {
+    response = await fetch(
+      `${API_BASE_URL}/flights/price-intelligence/${encodeURIComponent(offerId)}?price=${currentPrice}`,
+    );
+  } catch {
+    throw new ApiError("Não conseguimos falar com o servidor agora. Verifique sua conexão e tente novamente.");
+  }
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new ApiError("Não conseguimos analisar esse preço agora. Tente novamente em instantes.");
+  }
+
+  return mapPriceIntelligence(await response.json());
 }
