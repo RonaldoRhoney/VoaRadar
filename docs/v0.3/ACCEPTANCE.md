@@ -16,19 +16,19 @@
 
 ## Analytics
 
-- [ ] Mínimo.
-- [ ] Máximo.
-- [ ] Média.
-- [ ] Mediana.
-- [ ] Variação.
-- [ ] Score.
-- [ ] Confiança.
+- [x] Mínimo.
+- [x] Máximo.
+- [x] Média.
+- [x] Mediana (testado que não é puxada por outlier como a média é).
+- [x] Variação (`percentage_vs_mean`, `percentage_vs_min`).
+- [x] Score (posição relativa mín–máx, 0–100).
+- [x] Confiança (LOW/MEDIUM/HIGH por tamanho de amostra).
 
 ## Inteligência
 
-- [ ] Score determinístico.
-- [ ] Dados insuficientes tratados.
-- [ ] Sem previsão de futuro.
+- [x] Score determinístico (mesmo input → mesmo output, testado).
+- [x] Dados insuficientes tratados (0 observações → `has_sufficient_data=False`; poucas observações → stats calculadas normalmente, mas `confidence=LOW`).
+- [x] Sem previsão de futuro.
 - [ ] Sem afirmações enganosas.
 
 ## API

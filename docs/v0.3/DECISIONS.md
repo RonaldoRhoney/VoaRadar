@@ -57,3 +57,21 @@ Os models usam `sqlalchemy.Uuid(as_uuid=True)` (genérico) em vez de `sqlalchemy
 `app/collectors/airport_directory.py` resolve nome de cidade → código de aeroporto e nome de companhia → código, só pra alimentar o banco a partir dos dados fictícios do `MockFlightProvider`.
 
 **Motivo**: manter o contrato de `FlightProvider` limpo — um provider real (Amadeus, Duffel) já devolveria código IATA e código de companhia prontos, não precisaria dessa ponte. Isolar essa resolução no Collector evita vazar uma preocupação exclusiva do estágio mock para a interface que providers reais vão implementar depois.
+
+## DEC-016 — Fórmula do score: posição relativa dentro do intervalo mín–máx
+
+```python
+if maximum == minimum:
+    score = 50  # sem variação histórica, neutro
+else:
+    position = (current_price - minimum) / (maximum - minimum)
+    score = round((1 - position) * 100)  # 0=mais caro já visto, 100=mais barato já visto
+```
+
+Confirmada na análise A–K da FASE 2 (proposta na seção F), implementada e testada em `app/analytics/engine.py` — inclusive os casos de fronteira (preço no mínimo → 100, no máximo → 0, ponto médio → 50, sem variação → 50, preço atual fora da faixa histórica → limitado a 0–100).
+
+## DEC-017 — Poucos dados não é "sem dados"
+
+`sample_size == 0` é o único caso que zera as estatísticas (`has_sufficient_data=False`). Com 1+ observações, o motor calcula normalmente (mínimo/máximo/média/score), só marca `confidence=LOW` quando `sample_size < 10`.
+
+**Motivo**: `UX.md` §3 mostra o exemplo "Ainda estamos aprendendo esta rota — 8 observações", ou seja, ainda mostra os dados junto do aviso de confiança baixa — não esconde o número, hedgeia a linguagem. Essa interpretação foi registrada aqui porque o `PRICE_INTELLIGENCE.md` §11 poderia ser lido como "não calcular nada com poucos dados"; optei pela leitura mais fiel ao UX.md.

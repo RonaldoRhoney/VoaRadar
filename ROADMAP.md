@@ -41,7 +41,8 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] FASE 2 — conectado ao Supabase real, migration aplicada (5 tabelas), rollback testado.
 - [x] FASE 3 — `PriceHistoryRepository` (get-or-create + dedup + histórico por rota), testado contra SQLite em memória.
 - [x] FASE 4 — `FlightCollector` alimenta o histórico a partir do `MockFlightProvider`; `scripts/seed_history.py` populou o Supabase real (9 observações, idempotência confirmada rodando 2x).
-- [ ] FASE 5 em diante — analytics engine, price intelligence service, API, frontend.
+- [x] FASE 5 — Analytics Engine (`app/analytics/`): mínimo/máximo/média/mediana/variação/score/confiança, puro e determinístico, 14 testes (fronteiras de score e confiança, outlier não distorce mediana, dados insuficientes). Validado contra o histórico real da rota BEL→REC (score 100/EXCELLENT pro preço mínimo já visto, confiança LOW com 6 observações).
+- [ ] FASE 6 em diante — Price Intelligence Service, API, frontend.
 
 ## Próximo
 

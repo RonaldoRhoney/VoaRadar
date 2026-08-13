@@ -12,7 +12,7 @@ STATUS: CONCLUÍDA (tag `v0.2.0`)
 
 ## v0.3 — Price Intelligence
 
-STATUS: EM ANDAMENTO — FASE 1 a 4 concluídas (schema, conexão real, repository, coleta de histórico já populando o Supabase)
+STATUS: EM ANDAMENTO — FASE 1 a 5 concluídas (schema, conexão real, repository, coleta de histórico, analytics engine — todos testados e validados contra dado real no Supabase)
 
 Objetivo: entender se o preço encontrado representa uma boa oportunidade em relação ao histórico disponível.
 
