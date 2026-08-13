@@ -1,7 +1,6 @@
 import uuid
 
-from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import TimestampedModel
@@ -15,8 +14,8 @@ class Route(TimestampedModel):
     )
 
     origin_airport_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("airports.id"), index=True
+        Uuid(as_uuid=True), ForeignKey("airports.id"), index=True
     )
     destination_airport_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("airports.id"), index=True
+        Uuid(as_uuid=True), ForeignKey("airports.id"), index=True
     )

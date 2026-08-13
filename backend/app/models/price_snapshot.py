@@ -1,11 +1,10 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import TimestampedModel
+from app.models.base import TimestampedModel, utcnow
 
 
 class PriceSnapshot(TimestampedModel):
@@ -19,10 +18,8 @@ class PriceSnapshot(TimestampedModel):
     __tablename__ = "price_snapshots"
 
     flight_observation_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("flight_observations.id"), index=True
+        Uuid(as_uuid=True), ForeignKey("flight_observations.id"), index=True
     )
     price: Mapped[float] = mapped_column(Numeric(10, 2), index=True)
     currency: Mapped[str] = mapped_column(String(3))
-    observed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("now()"), index=True
-    )
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)

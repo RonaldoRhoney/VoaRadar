@@ -1,8 +1,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Date, ForeignKey, Integer, String, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Date, ForeignKey, Integer, String, UniqueConstraint, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import TimestampedModel
@@ -31,8 +30,8 @@ class FlightObservation(TimestampedModel):
         ),
     )
 
-    route_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("routes.id"), index=True)
-    airline_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("airlines.id"), index=True)
+    route_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("routes.id"), index=True)
+    airline_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("airlines.id"), index=True)
     departure_date: Mapped[date] = mapped_column(Date, index=True)
     return_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     stops: Mapped[int] = mapped_column(Integer)

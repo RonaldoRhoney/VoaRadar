@@ -9,10 +9,10 @@
 
 ## Histórico
 
-- [ ] Observações armazenadas.
-- [ ] Histórico não sobrescrito.
-- [ ] Timestamp armazenado.
-- [ ] Provider identificado.
+- [x] Observações armazenadas (`scripts/seed_history.py` gravou 9 no Supabase real).
+- [x] Histórico não sobrescrito (rodar o coletor 2x: 9 `flight_observations` continuam 9, `price_snapshots` dobra pra 18 — cada rodada soma um preço novo, não substitui).
+- [x] Timestamp armazenado (`observed_at` em cada `price_snapshot`).
+- [x] Provider identificado (`provider="mock"` em cada `flight_observation`).
 
 ## Analytics
 

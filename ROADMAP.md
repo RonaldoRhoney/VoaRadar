@@ -39,7 +39,9 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 - [x] FASE 1 — modelo de dados (`Airport`, `Airline`, `Route`, `FlightObservation`, `PriceSnapshot`) + migration inicial.
 - [x] FASE 2 — conectado ao Supabase real, migration aplicada (5 tabelas), rollback testado.
-- [ ] FASE 3 em diante — repository, coleta de histórico, analytics engine, API, frontend.
+- [x] FASE 3 — `PriceHistoryRepository` (get-or-create + dedup + histórico por rota), testado contra SQLite em memória.
+- [x] FASE 4 — `FlightCollector` alimenta o histórico a partir do `MockFlightProvider`; `scripts/seed_history.py` populou o Supabase real (9 observações, idempotência confirmada rodando 2x).
+- [ ] FASE 5 em diante — analytics engine, price intelligence service, API, frontend.
 
 ## Próximo
 

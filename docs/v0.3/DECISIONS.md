@@ -45,3 +45,15 @@ O backend é responsável pela inteligência; o frontend só apresenta.
 `alembic upgrade head` falhava com `ValueError: invalid interpolation syntax` ao processar a `DATABASE_URL`. Causa: a senha do banco tem caracteres especiais (`@`) percent-encoded como `%40`, e `Config.set_main_option()` do Alembic passa o valor pelo `configparser`, que interpreta `%` como início de sintaxe de interpolação (`%(nome)s`).
 
 **Solução**: `alembic/env.py` deixou de usar `config.set_main_option("sqlalchemy.url", ...)` + `engine_from_config` (que dependem do `configparser`) e passou a criar a engine diretamente com `sqlalchemy.create_engine(DATABASE_URL, ...)`, lendo a URL direto de `app.core.config` — nunca mais passa pelo parser de `.ini`. Testado de ponta a ponta: `upgrade head` → 5 tabelas criadas no Supabase real → `downgrade -1` limpa tudo → `upgrade head` reaplica sem erro.
+
+## DEC-014 — Uuid portável e defaults em Python, não específicos do Postgres
+
+Os models usam `sqlalchemy.Uuid(as_uuid=True)` (genérico) em vez de `sqlalchemy.dialects.postgresql.UUID`, e `default=uuid.uuid4`/`default=utcnow` (Python) em vez de `server_default=text("gen_random_uuid()")`/`text("now()")` (específicos do Postgres).
+
+**Motivo**: permite rodar os testes de repository contra SQLite em memória — rápido, sem tocar no Supabase real a cada `pytest`, mesma filosofia de teste que o resto do projeto já usa (providers fake, sem rede). No Postgres em produção o comportamento é idêntico. A migration (`0001_price_intelligence_schema.py`) continua com `postgresql.UUID`/`gen_random_uuid()` nativos no DDL — isso é intencional, o DDL alvo é sempre Postgres; só o lado ORM/Python precisava ser portável.
+
+## DEC-015 — Diretório de aeroportos/companhias mock vive no Collector, não no Provider
+
+`app/collectors/airport_directory.py` resolve nome de cidade → código de aeroporto e nome de companhia → código, só pra alimentar o banco a partir dos dados fictícios do `MockFlightProvider`.
+
+**Motivo**: manter o contrato de `FlightProvider` limpo — um provider real (Amadeus, Duffel) já devolveria código IATA e código de companhia prontos, não precisaria dessa ponte. Isolar essa resolução no Collector evita vazar uma preocupação exclusiva do estágio mock para a interface que providers reais vão implementar depois.
