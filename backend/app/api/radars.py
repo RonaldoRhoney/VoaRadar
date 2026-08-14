@@ -14,6 +14,7 @@ router = APIRouter(prefix="/radars", tags=["radars"])
 FRIENDLY_NOT_FOUND = "Radar não encontrado."
 FRIENDLY_INVALID_AIRPORT = "Origem ou destino inválidos."
 FRIENDLY_INVALID_CONDITION = "Condição do Radar incompleta — confira o valor ou a classificação escolhida."
+FRIENDLY_SAME_AIRPORT = "Origem e destino não podem ser o mesmo aeroporto."
 
 
 @router.post("", response_model=RadarOut, status_code=201)
@@ -77,6 +78,8 @@ def update_radar(
         raise HTTPException(status_code=422, detail=FRIENDLY_INVALID_CONDITION)
     if radar.condition_type == "OPPORTUNITY_CLASSIFICATION" and radar.condition_classification is None:
         raise HTTPException(status_code=422, detail=FRIENDLY_INVALID_CONDITION)
+    if radar.origin_airport_id == radar.destination_airport_id:
+        raise HTTPException(status_code=422, detail=FRIENDLY_SAME_AIRPORT)
 
     # Limpa o campo da condição anterior ao trocar de tipo — evita lixo de
     # dado que não é mais usado por nenhuma leitura, mas ficaria salvo.

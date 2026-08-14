@@ -24,6 +24,7 @@ class Radar(TimestampedModel):
     __table_args__ = (
         CheckConstraint(f"condition_type IN ('{PRICE_BELOW}', '{OPPORTUNITY_CLASSIFICATION}')", name="ck_radar_condition_type"),
         CheckConstraint(f"status IN ('{ACTIVE}', '{PAUSED}')", name="ck_radar_status"),
+        CheckConstraint("origin_airport_id != destination_airport_id", name="ck_radar_distinct_airports"),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), index=True)

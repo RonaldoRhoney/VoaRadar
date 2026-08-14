@@ -56,6 +56,28 @@ def test_condition_price_ausente_em_price_below_e_422(client, db_session, make_a
     assert response.status_code == 422
 
 
+def test_criar_radar_com_origem_igual_destino_e_422(client, db_session, make_auth_headers):
+    origin, _ = _seed_airports(db_session)
+    _, headers = make_auth_headers()
+
+    payload = _radar_payload(origin, origin)
+
+    response = client.post("/radars", json=payload, headers=headers)
+
+    assert response.status_code == 422
+
+
+def test_editar_radar_para_origem_igual_destino_e_422(client, db_session, make_auth_headers):
+    origin, destination = _seed_airports(db_session)
+    _, headers = make_auth_headers()
+
+    radar_id = client.post("/radars", json=_radar_payload(origin, destination), headers=headers).json()["id"]
+
+    response = client.put(f"/radars/{radar_id}", json={"destination_airport_id": str(origin.id)}, headers=headers)
+
+    assert response.status_code == 422
+
+
 def test_editar_radar_para_price_below_sem_condition_price_e_422(client, db_session, make_auth_headers):
     """RadarUpdate é parcial e não tem o model_validator do RadarCreate —
     a checagem precisa acontecer no estado final mesclado (radars.py)."""

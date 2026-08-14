@@ -24,6 +24,12 @@ class RadarCreate(BaseModel):
             raise ValueError("condition_classification é obrigatório quando condition_type = OPPORTUNITY_CLASSIFICATION")
         return self
 
+    @model_validator(mode="after")
+    def _origin_differs_from_destination(self) -> "RadarCreate":
+        if self.origin_airport_id == self.destination_airport_id:
+            raise ValueError("Origem e destino não podem ser o mesmo aeroporto")
+        return self
+
 
 class RadarUpdate(BaseModel):
     name: str | None = None
