@@ -42,7 +42,21 @@ Antes do release da v0.4.0, testar explicitamente (automatizado, não manual):
 
 Nenhuma mudança de princípio em relação à v0.3 (`AUDIT_SECURITY.md` item 4): chave do Supabase Auth usada no frontend é a `anon key` pública (apropriada para ir no bundle, por design do Supabase); qualquer chave de service role fica só no backend, em variável de ambiente, nunca commitada.
 
-## 6. Achado real durante a FASE 5 — grants automáticos do Supabase vazando por baixo
+## 6. Auditoria formal FASE 9 (2026-08-14) — checklist completo das 5 falhas
+
+Rodado contra o estado real: 92/92 pytest, Bandit limpo, backend com as migrations `0004`-`0010` aplicadas no Supabase real.
+
+| Falha | Verificação | Resultado |
+|---|---|---|
+| 1. RLS desativado | `pg_class.relrowsecurity`, `information_schema.role_table_grants`, `pg_policies`, `pg_roles.rolbypassrls` — introspecção real no Postgres | ✅ 10 tabelas com RLS ativo (6 da v0.3 + `profiles`/`radars`/`radar_events`/`notifications`); `anon` sem nenhum grant; `authenticated` só com o escopo pretendido por tabela (`profiles`=SELECT, `radars`=SELECT/INSERT/UPDATE/DELETE, `radar_events`=SELECT, `notifications`=SELECT/UPDATE); backend (`postgres`) com `rolbypassrls=true`; 5 policies reais por `auth.uid()` |
+| 2. Permissão no front-end | `grep -rniE "localStorage\|sessionStorage\|isAdmin\|is_admin\|role\s*===\|permission" frontend/src` | ✅ Único resultado é `features/auth/session.ts` guardando o token de sessão (opaco) em `localStorage` — não é decisão de permissão, é armazenamento de credencial; toda autorização é imposta no backend via validação de JWT (`core/auth.py`) + checagem de posse em cada repository |
+| 3. IDOR | Todo endpoint com `{id}` (`GET/PUT/DELETE /radars/{id}`, `PATCH /notifications/{id}/read`) revisado; matriz automatizada rodada ao vivo | ✅ 10/10 testes de IDOR passando — usuário B sempre recebe 404 (nunca 403) ao tentar ler/editar/apagar recurso do usuário A; `RadarNotFoundError`/`NotificationNotFoundError` conflatam "não existe" e "não é seu" de propósito |
+| 4. Chaves expostas | grep de segredo hardcoded no repo, `git log` do `.env`, grep no `dist/` de produção | ✅ Zero ocorrências de segredo hardcoded; `.env` nunca foi commitado (gitignorado desde a raiz); build de produção do frontend sem `sk-`/`SERVICE_ROLE`/`SECRET`; único uso de env var no client é `VITE_API_BASE_URL` (URL, não segredo) |
+| 5. XSS | `grep -rn "dangerouslySetInnerHTML\|innerHTML\|eval(" frontend/src` | ✅ Zero ocorrências em todo o código novo da v0.4 (formulário de Radar, central de notificações, login/cadastro) — React escapa por padrão, mesma garantia já validada com payload real na v0.2 |
+
+**Conclusão**: os 5 itens passam. Os itens 2 e 3, que eram N/A na v0.3 por não existir login, agora são testados de verdade — é o primeiro produto RhoneyInc a completar o checklist com dado real por usuário. Nenhum achado novo nesta rodada (os achados reais da v0.4 — grants automáticos, JWT via JWKS, cascade de exclusão, sino de notificações dessincronizado, validação de condição no PUT, origem=destino — já foram corrigidos e documentados em `DECISIONS.md` DEC-109 e DEC-111 a DEC-115 antes desta auditoria formal).
+
+## 7. Achado real durante a FASE 5 — grants automáticos do Supabase vazando por baixo
 
 Ao verificar as migrations `0004`-`0007` com introspecção real (mesma disciplina do `AUDIT_SECURITY.md` da v0.3), `authenticated` apareceu com `INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER` em todas as 4 tabelas novas — muito além do que cada migration concedia explicitamente (ex: `profiles` só deveria ter `SELECT`). Causa: o Supabase aplica `ALTER DEFAULT PRIVILEGES` automaticamente a toda tabela nova do schema `public`, concedendo acesso completo a `authenticated` antes de qualquer `GRANT` explícito da migration rodar — um `GRANT` seletivo é aditivo, não substitui esse padrão automático.
 

@@ -72,6 +72,24 @@ Achado real ao testar `DELETE /radars/{id}` ao vivo contra o Supabase (2026-08-1
 
 **Lição de teste**: o teste automatizado original não pegou esse bug porque o SQLite dos testes não aplica `PRAGMA foreign_keys=ON` por padrão — FKs eram silenciosamente ignoradas, então até uma migration com FK errada "passava". Corrigido em `conftest.py` (liga o pragma na conexão de teste) — agora o SQLite se comporta como o Postgres real nesse aspecto, consistente com a filosofia de portabilidade já registrada em `docs/v0.3/DECISIONS.md` DEC-014.
 
+## DEC-113 — Notificações viram um `NotificationsProvider` (estado compartilhado), não um hook independente por componente
+
+Achado de revisão manual (2026-08-14): `Header.tsx` (sino) e `pages/Notifications.tsx` chamavam `useNotifications` cada um com sua própria instância — marcar uma notificação como lida numa tela não atualizava a contagem na outra até recarregar a página.
+
+**Correção**: `features/notifications/NotificationsProvider.tsx`, mesmo padrão do `AuthProvider` — uma única fonte de verdade montada em `main.tsx`, envolvendo `<App />`. `useNotifications()` deixou de receber `accessToken` como parâmetro (lê a sessão internamente via `useAuth`).
+
+## DEC-114 — `PUT /radars/{id}` valida a condição no estado final mesclado, não no corpo da requisição
+
+Achado de revisão manual: `RadarCreate` tem um `model_validator` garantindo que `condition_type=PRICE_BELOW` sempre venha com `condition_price` (e o mesmo pra `OPPORTUNITY_CLASSIFICATION`/`condition_classification`). `RadarUpdate` é parcial (`exclude_unset`) e não pode ter a mesma validação por campo isolado — um PATCH que só manda `condition_type` novo, sem o campo de valor correspondente, passava pelo schema e salvava um Radar que nunca dispararia, em silêncio.
+
+**Correção**: `api/radars.py` valida o objeto `radar` já mesclado (depois do `setattr`, antes do `commit`) e responde 422 amigável se a combinação ficar inconsistente. Também limpa o campo da condição anterior ao trocar de tipo (`condition_classification=None` ao virar `PRICE_BELOW`, e vice-versa) — higiene de dado, evita lixo que nenhuma leitura usa mais.
+
+## DEC-115 — `radars` ganha o mesmo CHECK de `routes`: origem ≠ destino
+
+Achado de revisão manual: `routes` tem `CHECK (origin_airport_id != destination_airport_id)` desde a v0.3 (`0001`); `radars` referencia aeroportos diretamente (não `routes`, ver `DATA_MODEL.md` §6) e não tinha a mesma garantia — nada impedia criar um Radar com origem igual ao destino (inofensivo, mas nonsense de produto: nunca existiria rota real pra casar).
+
+**Correção em 3 camadas**: `RadarCreate.model_validator` (schema), validação do estado final mesclado no `PUT` (mesmo mecanismo do DEC-114), e `CHECK` constraint no banco (migration `0010`, defesa em profundidade — mesmo princípio já estabelecido pra RLS).
+
 ## Melhoria futura identificada — skill `admin-padrao` (RhoneyInc)
 
 A skill `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`) exige que todo produto RhoneyInc com conceito de admin promova `rhoneyinc@gmail.com` automaticamente. A v0.4 introduz `profiles` (primeira tabela de usuário do Voa Radar), mas **sem** coluna `role` nem painel administrativo — não há "admin" a promover ainda, então a skill não se aplica hoje. Registrado aqui para não ser esquecido: no dia em que um papel de admin for desenhado pro Voa Radar (fora do escopo da v0.4, nenhum pedido do usuário até agora), aplicar o trigger `handle_new_user()` do mesmo padrão do hub RhoneyInc.
