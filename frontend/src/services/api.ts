@@ -1,9 +1,22 @@
 import type { ExploreParams, ExploreResult, Offer, Destination } from "../types/flight";
 import type { PriceHistoryPoint, PriceIntelligence } from "../types/priceIntelligence";
+import type { Session } from "../types/auth";
+import type { Airport, Radar } from "../types/radar";
+import type { AppNotification } from "../types/notification";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 export class ApiError extends Error {}
+
+const FRIENDLY_NETWORK_ERROR = "Não conseguimos falar com o servidor agora. Verifique sua conexão e tente novamente.";
+
+async function fetchJson(path: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE_URL}${path}`, init);
+  } catch {
+    throw new ApiError(FRIENDLY_NETWORK_ERROR);
+  }
+}
 
 // O backend fala snake_case (contrato em docs/v0.2/ARCHITECTURE.md); o
 // frontend trabalha em camelCase. Este arquivo é a única fronteira entre
@@ -178,4 +191,234 @@ export async function fetchPriceIntelligence(
   }
 
   return mapPriceIntelligence(await response.json());
+}
+
+// --- Auth (v0.4) ---------------------------------------------------------
+
+interface TokenResponseWire {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
+function isTokenResponse(body: unknown): body is TokenResponseWire {
+  return typeof body === "object" && body !== null && "access_token" in body;
+}
+
+function toSession(body: TokenResponseWire): Session {
+  return {
+    accessToken: body.access_token,
+    refreshToken: body.refresh_token,
+    expiresAt: Date.now() + body.expires_in * 1000,
+  };
+}
+
+const FRIENDLY_AUTH_ERROR = "Não foi possível completar essa ação. Confira o e-mail e a senha e tente de novo.";
+
+/** O backend sempre devolve `detail` amigável (nunca stack trace cru,
+ * CLAUDE.md §15) — usa direto quando presente, com fallback só por segurança. */
+async function authErrorMessage(response: Response): Promise<string> {
+  try {
+    const body = await response.json();
+    return typeof body.detail === "string" ? body.detail : FRIENDLY_AUTH_ERROR;
+  } catch {
+    return FRIENDLY_AUTH_ERROR;
+  }
+}
+
+/** `null` = cadastro recebido mas aguardando confirmação por e-mail — não é
+ * erro, é um estado válido (o backend pode exigir confirmação). */
+export async function signup(email: string, password: string): Promise<Session | null> {
+  const response = await fetchJson("/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) throw new ApiError(await authErrorMessage(response));
+  const body = await response.json();
+  return isTokenResponse(body) ? toSession(body) : null;
+}
+
+export async function login(email: string, password: string): Promise<Session> {
+  const response = await fetchJson("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) throw new ApiError(await authErrorMessage(response));
+  return toSession(await response.json());
+}
+
+export async function logout(accessToken: string): Promise<void> {
+  await fetchJson("/auth/logout", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+// --- Chamadas autenticadas (Radares, notificações) ------------------------
+
+class AuthRequiredError extends ApiError {}
+
+async function authFetch(path: string, accessToken: string, init?: RequestInit): Promise<Response> {
+  const response = await fetchJson(path, {
+    ...init,
+    headers: { ...init?.headers, Authorization: `Bearer ${accessToken}` },
+  });
+  if (response.status === 401) throw new AuthRequiredError("Sua sessão expirou. Entre novamente.");
+  return response;
+}
+
+export { AuthRequiredError };
+
+// --- Airports (v0.4 — só pro seletor de origem/destino do Radar) ----------
+
+interface AirportWire {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+}
+
+export async function listAirports(): Promise<Airport[]> {
+  const response = await fetchJson("/airports");
+  if (!response.ok) throw new ApiError("Não conseguimos carregar a lista de aeroportos.");
+  const body: AirportWire[] = await response.json();
+  return body;
+}
+
+// --- Radares (v0.4) --------------------------------------------------------
+
+interface RadarWire {
+  id: string;
+  name: string;
+  origin_airport_id: string;
+  destination_airport_id: string;
+  status: "ACTIVE" | "PAUSED";
+  condition_type: "PRICE_BELOW" | "OPPORTUNITY_CLASSIFICATION";
+  condition_price: number | null;
+  condition_classification: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function mapRadar(radar: RadarWire): Radar {
+  return {
+    id: radar.id,
+    name: radar.name,
+    originAirportId: radar.origin_airport_id,
+    destinationAirportId: radar.destination_airport_id,
+    status: radar.status,
+    conditionType: radar.condition_type,
+    conditionPrice: radar.condition_price,
+    conditionClassification: radar.condition_classification,
+    createdAt: radar.created_at,
+    updatedAt: radar.updated_at,
+  };
+}
+
+export interface RadarInput {
+  name: string;
+  originAirportId: string;
+  destinationAirportId: string;
+  conditionType: "PRICE_BELOW" | "OPPORTUNITY_CLASSIFICATION";
+  conditionPrice?: number | null;
+  conditionClassification?: string | null;
+}
+
+function radarInputToWire(input: RadarInput) {
+  return {
+    name: input.name,
+    origin_airport_id: input.originAirportId,
+    destination_airport_id: input.destinationAirportId,
+    condition_type: input.conditionType,
+    condition_price: input.conditionPrice ?? null,
+    condition_classification: input.conditionClassification ?? null,
+  };
+}
+
+const FRIENDLY_RADAR_ERROR = "Não conseguimos salvar o Radar agora. Confira os dados e tente de novo.";
+
+export async function createRadar(accessToken: string, input: RadarInput): Promise<Radar> {
+  const response = await authFetch("/radars", accessToken, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(radarInputToWire(input)),
+  });
+  if (!response.ok) throw new ApiError(FRIENDLY_RADAR_ERROR);
+  return mapRadar(await response.json());
+}
+
+export async function listRadars(accessToken: string): Promise<Radar[]> {
+  const response = await authFetch("/radars", accessToken);
+  if (!response.ok) throw new ApiError("Não conseguimos carregar seus Radares agora.");
+  const body: RadarWire[] = await response.json();
+  return body.map(mapRadar);
+}
+
+export async function updateRadar(
+  accessToken: string,
+  radarId: string,
+  patch: Partial<RadarInput> & { status?: "ACTIVE" | "PAUSED" },
+): Promise<Radar> {
+  const body: Record<string, unknown> = {};
+  if (patch.name !== undefined) body.name = patch.name;
+  if (patch.originAirportId !== undefined) body.origin_airport_id = patch.originAirportId;
+  if (patch.destinationAirportId !== undefined) body.destination_airport_id = patch.destinationAirportId;
+  if (patch.status !== undefined) body.status = patch.status;
+  if (patch.conditionType !== undefined) body.condition_type = patch.conditionType;
+  if (patch.conditionPrice !== undefined) body.condition_price = patch.conditionPrice;
+  if (patch.conditionClassification !== undefined) body.condition_classification = patch.conditionClassification;
+
+  const response = await authFetch(`/radars/${radarId}`, accessToken, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (response.status === 404) throw new ApiError("Radar não encontrado.");
+  if (!response.ok) throw new ApiError(FRIENDLY_RADAR_ERROR);
+  return mapRadar(await response.json());
+}
+
+export async function deleteRadar(accessToken: string, radarId: string): Promise<void> {
+  const response = await authFetch(`/radars/${radarId}`, accessToken, { method: "DELETE" });
+  if (response.status === 404) throw new ApiError("Radar não encontrado.");
+  if (!response.ok) throw new ApiError(FRIENDLY_RADAR_ERROR);
+}
+
+// --- Notificações (v0.4) ----------------------------------------------------
+
+interface NotificationWire {
+  id: string;
+  radar_id: string;
+  type: string;
+  title: string;
+  message: string;
+  read_at: string | null;
+  created_at: string;
+}
+
+function mapNotification(notification: NotificationWire): AppNotification {
+  return {
+    id: notification.id,
+    radarId: notification.radar_id,
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    readAt: notification.read_at,
+    createdAt: notification.created_at,
+  };
+}
+
+export async function listNotifications(accessToken: string): Promise<AppNotification[]> {
+  const response = await authFetch("/notifications", accessToken);
+  if (!response.ok) throw new ApiError("Não conseguimos carregar suas notificações agora.");
+  const body: NotificationWire[] = await response.json();
+  return body.map(mapNotification);
+}
+
+export async function markNotificationRead(accessToken: string, notificationId: string): Promise<AppNotification> {
+  const response = await authFetch(`/notifications/${notificationId}/read`, accessToken, { method: "PATCH" });
+  if (!response.ok) throw new ApiError("Não conseguimos marcar essa notificação como lida.");
+  return mapNotification(await response.json());
 }

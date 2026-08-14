@@ -48,6 +48,18 @@ Achado real na FASE 5 (não hipotético): as migrations `0004`-`0007` concediam 
 
 **Correção**: migration `0008`. **Regra daqui pra frente**: toda migration que cria tabela no `public` faz `REVOKE ALL ON TABLE <t> FROM anon, authenticated` **antes** de qualquer `GRANT`, mesmo que a intenção seja conceder algo depois — nunca assumir que a tabela nasce sem acesso. Ver `SECURITY.md` §6.
 
+## DEC-110 — Frontend fala com o backend pra auth, não direto com o Supabase Auth (revisa ARCHITECTURE.md §3/§7)
+
+`ARCHITECTURE.md` previa o frontend usando o SDK `@supabase/supabase-js` diretamente pra sessão/login, com refresh automático. Na implementação (FASE 6), optei por manter tudo passando pelos endpoints já construídos e testados na FASE 5 (`POST /auth/signup`, `/auth/login`, `/auth/logout`), com o frontend guardando `access_token`/`refresh_token` em `localStorage`.
+
+**Motivo**: o backend já cria a linha em `profiles` de forma atômica com o cadastro (`api/auth.py`); usar o SDK do Supabase direto no frontend exigiria ou duplicar essa lógica (profile criado por outro caminho, ex: trigger de banco) ou um endpoint extra só pra "confirmar profile depois do signup" — mais uma peça móvel sem benefício claro nesta fase. Evita também manter configuração do Supabase (URL, anon key) duplicada em dois `.env` (backend e frontend).
+
+**Custo aceito**: sem refresh automático de sessão nesta versão — o `access_token` expira (padrão do Supabase, ~1h) e o usuário precisa logar de novo. Registrado como limitação conhecida da v0.4.0, não como lacuna esquecida — refresh automático via `refresh_token` é candidato natural pra v0.4.x se o atrito for sentido no uso real.
+
+## Melhoria futura identificada — skill `admin-padrao` (RhoneyInc)
+
+A skill `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`) exige que todo produto RhoneyInc com conceito de admin promova `rhoneyinc@gmail.com` automaticamente. A v0.4 introduz `profiles` (primeira tabela de usuário do Voa Radar), mas **sem** coluna `role` nem painel administrativo — não há "admin" a promover ainda, então a skill não se aplica hoje. Registrado aqui para não ser esquecido: no dia em que um papel de admin for desenhado pro Voa Radar (fora do escopo da v0.4, nenhum pedido do usuário até agora), aplicar o trigger `handle_new_user()` do mesmo padrão do hub RhoneyInc.
+
 ## Pendência herdada da v0.3
 
 Tag `v0.3.1` ainda não foi cortada para os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) — decisão já aprovada pelo usuário, execução ficou pausada quando o foco mudou para o planejamento da v0.4. Não bloqueia o início da v0.4, mas deve ser resolvida antes ou junto do início da FASE 5 do código, pra manter o histórico de tags coerente.

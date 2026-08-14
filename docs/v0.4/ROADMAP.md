@@ -8,13 +8,15 @@
 - [x] FASE 3 — Definir arquitetura do monitoramento (`ARCHITECTURE.md`, `RADAR_ENGINE.md`).
 - [x] FASE 4 — Definir segurança/RLS (`SECURITY.md`).
 - [x] FASE 5 — Implementar backend (auth, models, migrations, radar engine, evaluation service, API). 84/84 testes passando, Bandit limpo, migrations 0004-0008 aplicadas e verificadas no Supabase real (RLS + grants corretos, rollback testado).
-- [ ] FASE 6 — Implementar interface (login/cadastro, Meus Radares, criar/editar Radar).
-- [ ] FASE 7 — Central de notificações (backend concluído nesta FASE 5; falta frontend).
-- [ ] FASE 8 — Testes E2E (unitários/integração/API já cobertos na FASE 5; falta E2E de ponta a ponta via navegador).
-- [ ] FASE 9 — Auditoria (skill `vibe-coding-5-falhas` completa, com itens 2 e 3 aplicáveis).
+- [x] FASE 6 — Implementar interface (login/cadastro, Meus Radares, criar/editar Radar, sino de notificações no header). `tsc`/oxlint limpos, 16/16 Vitest, build de produção ok.
+- [x] FASE 7 — Central de notificações (backend da FASE 5 + página `/notificacoes` e sino no header desta FASE 6).
+- [x] FASE 8 — Testes E2E de fumaça (rotas protegidas, renderização, tratamento de erro amigável) — 7/7 Playwright passando (v0.2/v0.3 sem regressão + v0.4). Fluxo real de cadastro/login **não foi validado com credenciais reais do Supabase Auth** — `SUPABASE_URL`/`ANON_KEY`/`JWT_SECRET` ainda não preenchidos em `backend/.env`, ver pendência abaixo.
+- [ ] FASE 9 — Auditoria (skill `vibe-coding-5-falhas` completa, com itens 2 e 3 aplicáveis). Reconfirmado parcialmente durante a FASE 5-6 (grep de permissão-no-front/XSS limpo no código novo, matriz IDOR testada) — falta a passada formal de FASE 9 com o checklist completo antes do release.
 - [ ] FASE 10 — Release `v0.4.0`.
 
-**Estado atual**: FASE 0–5 concluídas. Backend completo: `auth.py`/`radars.py`/`notifications.py`, models, migrations `0004`-`0008` (incluindo correção de achado real de segurança — grants automáticos do Supabase, ver `SECURITY.md` §6/`DECISIONS.md` DEC-109), Radar Engine + cooldown puros e testados, `RadarEvaluationService` ligado ao `FlightCollector`. Próximo passo: FASE 6 (frontend).
+**Estado atual**: FASE 0–8 concluídas. Backend: `auth.py`/`radars.py`/`notifications.py`/`airports.py`, models, migrations `0004`-`0008` (incluindo correção de achado real de segurança — grants automáticos do Supabase, ver `SECURITY.md` §6/`DECISIONS.md` DEC-109), Radar Engine + cooldown puros e testados, `RadarEvaluationService` ligado ao `FlightCollector`. Frontend: auth (via backend, não supabase-js — DEC-110), Meus Radares (CRUD completo), central de notificações, sino no header.
+
+**Pendência bloqueante pro teste real de ponta a ponta**: preencher `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET` em `backend/.env` (ver painel Supabase > Settings > API) — sem isso, `/auth/signup` e `/auth/login` respondem 503 amigável (testado e funcionando como esperado), mas o cadastro/login real nunca foi exercitado contra o Supabase Auth de verdade. Próximo passo: usuário preencher essas chaves, depois validar manualmente cadastro → login → criar Radar → disparo → notificação, antes da FASE 9.
 
 ## Depois da v0.4.0 (v0.4.x)
 

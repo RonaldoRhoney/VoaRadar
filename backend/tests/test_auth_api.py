@@ -114,3 +114,16 @@ def test_logout_sem_token_tambem_e_204(client, db_session):
     response = client.post("/auth/logout")
 
     assert response.status_code == 204
+
+
+def test_signup_sem_supabase_configurado_e_503_amigavel(client, db_session, monkeypatch):
+    """SUPABASE_URL vazio (estado padrão sem .env preenchido) não pode
+    virar um 500 cru — precisa de um erro amigável e estruturado."""
+    monkeypatch.setenv("SUPABASE_URL", "")
+    get_settings.cache_clear()
+
+    response = client.post("/auth/signup", json={"email": "user@example.com", "password": "senha-forte-123"})
+
+    assert response.status_code == 503
+    assert "Internal Server Error" not in response.text
+    get_settings.cache_clear()

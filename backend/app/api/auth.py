@@ -16,6 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 FRIENDLY_AUTH_ERROR = "Não foi possível completar essa ação. Confira o e-mail e a senha e tente de novo."
 CONFIRMATION_REQUIRED = "Cadastro recebido. Confirme seu e-mail para poder entrar."
+AUTH_NOT_CONFIGURED = "Login ainda não está disponível. Tente novamente mais tarde."
 
 
 def _auth_headers() -> dict[str, str]:
@@ -23,11 +24,21 @@ def _auth_headers() -> dict[str, str]:
     return {"apikey": settings.supabase_anon_key, "Content-Type": "application/json"}
 
 
+def _require_supabase_configured() -> None:
+    """SUPABASE_URL vazio faria o httpx.post abaixo levantar uma exceção
+    de URL inválida, virando um 500 cru — nunca deixar isso escapar
+    (CLAUDE.md §15). Acontece hoje em qualquer ambiente onde o .env ainda
+    não tem as chaves do Supabase Auth preenchidas."""
+    if not get_settings().supabase_url:
+        raise HTTPException(status_code=503, detail=AUTH_NOT_CONFIGURED)
+
+
 @router.post("/signup", response_model=TokenResponse | dict[str, str])
 def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> TokenResponse | dict[str, str]:
     """Delega o cadastro pro Supabase Auth — o backend nunca guarda senha.
     A linha em `profiles` é criada aqui mesmo, pela conexão do backend (que
     bypassa RLS), não por INSERT vindo do cliente autenticado."""
+    _require_supabase_configured()
     settings = get_settings()
     response = httpx.post(
         f"{settings.supabase_url}/auth/v1/signup",
@@ -49,6 +60,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> TokenRespon
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest) -> TokenResponse:
+    _require_supabase_configured()
     settings = get_settings()
     response = httpx.post(
         f"{settings.supabase_url}/auth/v1/token?grant_type=password",
@@ -69,7 +81,7 @@ def logout(credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_sc
     """Revoga o refresh token no Supabase Auth. Idempotente: mesmo sem
     sessão válida, sempre responde 204 — logout nunca deveria falhar
     visivelmente pro usuário."""
-    if credentials is None:
+    if credentials is None or not get_settings().supabase_url:
         return
     settings = get_settings()
     httpx.post(
