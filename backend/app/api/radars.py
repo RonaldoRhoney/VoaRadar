@@ -13,6 +13,7 @@ router = APIRouter(prefix="/radars", tags=["radars"])
 
 FRIENDLY_NOT_FOUND = "Radar não encontrado."
 FRIENDLY_INVALID_AIRPORT = "Origem ou destino inválidos."
+FRIENDLY_INVALID_CONDITION = "Condição do Radar incompleta — confira o valor ou a classificação escolhida."
 
 
 @router.post("", response_model=RadarOut, status_code=201)
@@ -66,6 +67,23 @@ def update_radar(
 
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(radar, field, value)
+
+    # RadarCreate valida isso no schema (model_validator) — RadarUpdate é
+    # parcial e não pode fazer a mesma checagem por campo isolado, então a
+    # invariante é conferida aqui, no estado final já mesclado. Sem isso,
+    # dava pra salvar um Radar com condition_type=PRICE_BELOW sem
+    # condition_price — ele nunca dispararia, silenciosamente.
+    if radar.condition_type == "PRICE_BELOW" and radar.condition_price is None:
+        raise HTTPException(status_code=422, detail=FRIENDLY_INVALID_CONDITION)
+    if radar.condition_type == "OPPORTUNITY_CLASSIFICATION" and radar.condition_classification is None:
+        raise HTTPException(status_code=422, detail=FRIENDLY_INVALID_CONDITION)
+
+    # Limpa o campo da condição anterior ao trocar de tipo — evita lixo de
+    # dado que não é mais usado por nenhuma leitura, mas ficaria salvo.
+    if radar.condition_type == "PRICE_BELOW":
+        radar.condition_classification = None
+    else:
+        radar.condition_price = None
 
     try:
         db.commit()

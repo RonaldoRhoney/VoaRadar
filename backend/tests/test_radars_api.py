@@ -56,6 +56,40 @@ def test_condition_price_ausente_em_price_below_e_422(client, db_session, make_a
     assert response.status_code == 422
 
 
+def test_editar_radar_para_price_below_sem_condition_price_e_422(client, db_session, make_auth_headers):
+    """RadarUpdate é parcial e não tem o model_validator do RadarCreate —
+    a checagem precisa acontecer no estado final mesclado (radars.py)."""
+    origin, destination = _seed_airports(db_session)
+    _, headers = make_auth_headers()
+
+    create_payload = _radar_payload(origin, destination)
+    create_payload["condition_type"] = "OPPORTUNITY_CLASSIFICATION"
+    create_payload["condition_classification"] = "EXCELLENT"
+    create_payload.pop("condition_price")
+    radar_id = client.post("/radars", json=create_payload, headers=headers).json()["id"]
+
+    response = client.put(f"/radars/{radar_id}", json={"condition_type": "PRICE_BELOW"}, headers=headers)
+
+    assert response.status_code == 422
+
+
+def test_editar_radar_troca_tipo_e_limpa_campo_anterior(client, db_session, make_auth_headers):
+    origin, destination = _seed_airports(db_session)
+    _, headers = make_auth_headers()
+
+    radar_id = client.post("/radars", json=_radar_payload(origin, destination), headers=headers).json()["id"]
+
+    response = client.put(
+        f"/radars/{radar_id}",
+        json={"condition_type": "OPPORTUNITY_CLASSIFICATION", "condition_classification": "EXCELLENT"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["condition_price"] is None
+    assert response.json()["condition_classification"] == "EXCELLENT"
+
+
 def test_excluir_radar_com_eventos_e_notificacoes_nao_quebra(client, db_session, make_auth_headers):
     """Achado real (2026-08-14, testado ao vivo contra o Supabase): sem
     ON DELETE CASCADE, apagar um Radar que já disparou pelo menos uma vez

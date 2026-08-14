@@ -2,8 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/useAuth";
 import { useNotifications } from "../features/notifications/useNotifications";
 
-function NotificationBell({ accessToken }: { accessToken: string }) {
-  const { unreadCount } = useNotifications(accessToken);
+function NotificationBell() {
+  const { unreadCount } = useNotifications();
 
   return (
     <Link to="/notificacoes" className="relative text-white/70 hover:text-white" aria-label="Notificações">
@@ -43,7 +43,7 @@ export function Header() {
               <Link to="/radares" className="hidden hover:text-white sm:inline">
                 Meus Radares
               </Link>
-              <NotificationBell accessToken={session.accessToken} />
+              <NotificationBell />
               <button onClick={handleLogout} className="hover:text-white">
                 Sair
               </button>

@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../features/auth/useAuth";
 import { useNotifications } from "../features/notifications/useNotifications";
 import { formatObservedDate } from "../utils/format";
 
 export function Notifications() {
-  const { session } = useAuth();
-  const { status, notifications, errorMessage, markRead } = useNotifications(session!.accessToken);
+  const { status, notifications, errorMessage, markRead } = useNotifications();
 
   return (
     <section className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
