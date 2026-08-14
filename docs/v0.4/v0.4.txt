@@ -1,0 +1,304 @@
+A v0.3.0 já está implementada, conectada ao Supabase, testada e auditada, e você ainda fez uma varredura profunda de RLS, regras de negócio e segurança, eu considero a v0.3 uma base consolidada.
+
+Não parta diretamente para código da v0.4. Primeiro precisamos definir exatamente o que o Radar fará com os dados que acabamos de começar a armazenar.
+
+✈️ Próximo ciclo: Voa Radar v0.4 — Radar & Alertas
+
+A evolução natural é:
+
+v0.2: Para onde posso viajar?
+v0.3: Esse preço é bom?
+v0.4: Avise-me quando aparecer uma oportunidade.
+
+O núcleo da v0.4
+
+O usuário poderá configurar algo como:
+
+🔔 Criar alerta
+
+Origem: Belém
+Destino: Qualquer destino
+Orçamento: R$ 600
+Período: Outubro
+Flexibilidade: ±3 dias
+
+[ Ativar Radar ]
+
+O Voa Radar passa a monitorar as oportunidades.
+
+O fluxo que eu proponho
+Usuário
+   ↓
+Define preferência
+   ↓
+Cria Radar
+   ↓
+Supabase
+   ↓
+Sistema verifica novas ofertas
+   ↓
+Price Intelligence
+   ↓
+Preço atingiu condição?
+   ↓
+SIM
+   ↓
+Gerar oportunidade
+   ↓
+Notificação
+
+Mas existe uma diferença importante:
+
+Não devemos começar enviando WhatsApp/e-mail/push.
+
+Primeiro construiremos o motor de monitoramento.
+
+Assim conseguimos validar:
+
+Radar
+↓
+Regra
+↓
+Nova oferta
+↓
+Comparação
+↓
+Disparo
+
+sem introduzir várias integrações simultaneamente.
+
+🎯 Funcionalidades da v0.4
+1. Criar Radar
+
+O usuário poderá salvar uma busca.
+
+2. Editar Radar
+
+Alterar:
+
+orçamento;
+origem;
+destino;
+período;
+passageiros;
+flexibilidade;
+escalas;
+companhia.
+3. Ativar/desativar
+🟢 Radar ativo
+
+
+⚪ Radar pausado
+4. Condições
+
+O usuário poderá escolher:
+
+Por preço
+
+Avisar quando ficar abaixo de R$ 500.
+
+Por orçamento
+
+Avisar quando encontrar qualquer destino abaixo de R$ 600.
+
+Por oportunidade
+
+Avisar quando o Voa Radar classificar como "Excelente oportunidade".
+
+Isso é muito interessante porque conecta diretamente a v0.3 à v0.4.
+
+📊 O histórico começa a trabalhar a nosso favor
+
+Imagine que o Supabase tenha:
+
+BEL → REC
+
+
+Média: R$ 620
+Atual: R$ 580
+
+Nada acontece.
+
+Depois:
+
+Atual: R$ 510
+
+Ainda pode não disparar.
+
+Depois:
+
+Atual: R$ 429
+Score: 84
+
+🚨 Radar detectou oportunidade.
+
+🔔 Notificações
+
+Eu faria em etapas.
+
+v0.4.0
+
+Primeiro:
+
+Central de notificações dentro do próprio Voa Radar.
+
+Exemplo:
+
+🔥 Nova oportunidade encontrada!
+
+Belém → Recife
+R$ 429
+31% abaixo da média histórica.
+
+Ver oportunidade
+
+Isso reduz muito a complexidade inicial.
+
+Depois
+
+Podemos adicionar:
+
+e-mail;
+push;
+Telegram;
+WhatsApp.
+
+Não colocaria tudo na primeira versão.
+
+🧠 E tem uma coisa que eu faria diferente
+
+A v0.4 deve introduzir o conceito de:
+
+Radar
+
+Não simplesmente Alert.
+
+Porque isso pode virar uma identidade do produto.
+
+O usuário não "cria um alerta".
+
+Ele:
+
+Cria um Radar.
+
+Exemplo:
+
+🔵 Meu Radar Recife
+BEL → REC
+Até R$ 500
+Outubro
+±3 dias
+
+
+🟢 ATIVO
+
+Outro:
+
+🟣 Meu Radar Nordeste
+BEL
+Qualquer destino
+Até R$ 700
+
+
+🟢 ATIVO
+
+Isso deixa o produto muito mais interessante.
+
+🔐 E sua auditoria de segurança muda nossa prioridade
+
+Como você já revisou:
+
+RLS;
+regras de negócio;
+segurança;
+integração Supabase;
+persistência;
+
+na v0.4 precisamos manter uma regra:
+
+Toda nova tabela ou operação deverá nascer com política de acesso definida.
+
+Nada de:
+
+criar tabela
+↓
+deixar aberta
+↓
+"depois fazemos RLS"
+
+O Claude deverá tratar segurança como parte da implementação, não como etapa posterior.
+
+📁 Eu prepararia agora a v0.4 assim
+docs/
+└── v0.4/
+    ├── CONTEXT.md
+    ├── PRD.md
+    ├── UX.md
+    ├── ARCHITECTURE.md
+    ├── DATA_MODEL.md
+    ├── RADAR_ENGINE.md
+    ├── ALERT_RULES.md
+    ├── NOTIFICATIONS.md
+    ├── SECURITY.md
+    ├── IMPLEMENTATION.md
+    ├── ACCEPTANCE.md
+    ├── ROADMAP.md
+    └── DECISIONS.md
+
+E antes do Claude Code tocar no projeto:
+
+FASE 0
+
+Auditar o estado real da v0.3.
+
+FASE 1
+
+Definir modelo Radar.
+
+FASE 2
+
+Definir regras de disparo.
+
+FASE 3
+
+Definir arquitetura do monitoramento.
+
+FASE 4
+
+Definir segurança/RLS.
+
+FASE 5
+
+Implementar backend.
+
+FASE 6
+
+Implementar interface.
+
+FASE 7
+
+Central de notificações.
+
+FASE 8
+
+Testes.
+
+FASE 9
+
+Auditoria.
+
+FASE 10
+
+v0.4.0.
+
+E eu faria uma pausa estratégica aqui
+
+Antes de criarmos os documentos definitivos da v0.4, quero preservar uma coisa que você fez muito bem na v0.3: você não apenas mandou o Claude implementar; você fez uma auditoria profunda independente.
+
+Então, na próxima etapa, o Claude deve receber uma instrução explícita:
+
+"Não presuma que a arquitetura atual está correta apenas porque os testes estão verdes. Faça uma análise crítica antes de propor a implementação."
+
+Isso evita que o projeto vá acumulando decisões ruins versão após versão.
+
+Minha recomendação agora é: não codificar ainda. Vamos primeiro fechar o desenho completo da v0.4 — especialmente o conceito de Radar, regras de disparo, scheduler/monitoramento, Supabase/RLS e central de notificações. Depois disso eu te entrego o pacote completo para o Claude Code, como fizemos na v0.3.

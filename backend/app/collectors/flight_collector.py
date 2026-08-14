@@ -7,6 +7,7 @@ from app.collectors.airport_directory import (
 )
 from app.providers.base import FlightProvider
 from app.repositories.price_history_repository import PriceHistoryRepository
+from app.services.radar_evaluation_service import RadarEvaluationService
 
 DEFAULT_CURRENCY = "BRL"
 
@@ -21,11 +22,21 @@ class FlightCollector:
     Não analisa nada (isso é trabalho do Analytics Engine) — só normaliza e
     persiste. Hoje só sabe resolver os aeroportos do MOCK_AIRPORTS; um
     provider real viria com o próprio código IATA, sem precisar dessa ponte.
+
+    `radar_evaluator` é opcional (v0.4): quando presente, cada snapshot
+    gravado é avaliado contra os Radares ativos daquela rota logo em
+    seguida — orientado a evento, não por polling (RADAR_ENGINE.md §3).
     """
 
-    def __init__(self, provider: FlightProvider, repository: PriceHistoryRepository):
+    def __init__(
+        self,
+        provider: FlightProvider,
+        repository: PriceHistoryRepository,
+        radar_evaluator: RadarEvaluationService | None = None,
+    ):
         self._provider = provider
         self._repository = repository
+        self._radar_evaluator = radar_evaluator
 
     def collect(self, origin_city: str, month: str) -> int:
         origin_code = resolve_airport_code(origin_city)
@@ -52,7 +63,7 @@ class FlightCollector:
                 airline = self._repository.get_or_create_airline(
                     resolve_airline_code(offer.airline), offer.airline
                 )
-                self._repository.record_observation(
+                snapshot = self._repository.record_observation(
                     route_id=route.id,
                     airline_id=airline.id,
                     departure_date=date.fromisoformat(offer.departure_date),
@@ -65,5 +76,10 @@ class FlightCollector:
                     currency=DEFAULT_CURRENCY,
                 )
                 snapshots_recorded += 1
+
+                if self._radar_evaluator is not None:
+                    self._radar_evaluator.evaluate_for_route(
+                        route_id=route.id, current_price=offer.price, price_snapshot_id=snapshot.id
+                    )
 
         return snapshots_recorded

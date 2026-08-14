@@ -1,3 +1,6 @@
+import uuid
+
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -5,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import app.models  # noqa: F401 — registra os models na metadata do Base
+from app.core.config import get_settings
 from app.core.database import Base, get_db
 
 
@@ -47,3 +51,21 @@ def client(db_session):
         yield TestClient(app)
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def make_auth_headers():
+    """Gera um Bearer token válido pro `get_current_user_id` (core/auth.py)
+    aceitar — assinado com o mesmo SUPABASE_JWT_SECRET que a app usa em
+    tempo de teste (settings via .env, sem chamar o Supabase de verdade)."""
+
+    def _make(user_id: uuid.UUID | None = None) -> tuple[uuid.UUID, dict[str, str]]:
+        user_id = user_id or uuid.uuid4()
+        token = jwt.encode(
+            {"sub": str(user_id), "aud": "authenticated"},
+            get_settings().supabase_jwt_secret,
+            algorithm="HS256",
+        )
+        return user_id, {"Authorization": f"Bearer {token}"}
+
+    return _make

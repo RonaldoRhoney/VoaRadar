@@ -122,6 +122,9 @@ class PriceHistoryRepository:
         )
         return [(float(price), observed_at) for price, observed_at in rows]
 
+    def get_route(self, route_id: uuid.UUID) -> Route | None:
+        return self._session.get(Route, route_id)
+
     def find_route_id_by_provider_offer_id(self, provider_offer_id: str) -> uuid.UUID | None:
         observation = (
             self._session.query(FlightObservation)
