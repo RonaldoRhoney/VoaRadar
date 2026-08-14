@@ -13,7 +13,9 @@ class RadarEvent(TimestampedModel):
 
     __tablename__ = "radar_events"
 
-    radar_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("radars.id"), index=True)
+    radar_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("radars.id", ondelete="CASCADE"), index=True
+    )
     price_snapshot_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("price_snapshots.id"))
     price: Mapped[float] = mapped_column(Numeric(10, 2))
     score: Mapped[int | None] = mapped_column(Integer, nullable=True)

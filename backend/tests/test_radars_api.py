@@ -1,4 +1,8 @@
+import uuid
+
+from app.repositories.notification_repository import NotificationRepository
 from app.repositories.price_history_repository import PriceHistoryRepository
+from app.repositories.radar_repository import RadarRepository
 
 
 def _seed_airports(db_session):
@@ -50,6 +54,63 @@ def test_condition_price_ausente_em_price_below_e_422(client, db_session, make_a
     response = client.post("/radars", json=payload, headers=headers)
 
     assert response.status_code == 422
+
+
+def test_excluir_radar_com_eventos_e_notificacoes_nao_quebra(client, db_session, make_auth_headers):
+    """Achado real (2026-08-14, testado ao vivo contra o Supabase): sem
+    ON DELETE CASCADE, apagar um Radar que já disparou pelo menos uma vez
+    quebrava com IntegrityError — 500 cru. Migration 0009 corrigiu."""
+    from datetime import date, datetime, timezone
+
+    price_repo = PriceHistoryRepository(db_session)
+    origin, destination = _seed_airports(db_session)
+    user_id, headers = make_auth_headers()
+
+    airline = price_repo.get_or_create_airline("AD", "Azul")
+    route = price_repo.get_or_create_route(origin.id, destination.id)
+    snapshot = price_repo.record_observation(
+        route_id=route.id,
+        airline_id=airline.id,
+        departure_date=date(2026, 10, 14),
+        return_date=date(2026, 10, 18),
+        stops=1,
+        duration_minutes=260,
+        provider="mock",
+        provider_offer_id="offer-rec-001",
+        price=429,
+        currency="BRL",
+    )
+
+    radar = RadarRepository(db_session).create(
+        user_id=user_id,
+        name="Radar com histórico",
+        origin_airport_id=origin.id,
+        destination_airport_id=destination.id,
+        condition_type="PRICE_BELOW",
+        condition_price=500,
+    )
+    db_session.commit()
+
+    event = RadarRepository(db_session).record_match(
+        radar=radar,
+        price_snapshot_id=snapshot.id,
+        price=429,
+        score=100,
+        classification="EXCELLENT",
+        now=datetime.now(timezone.utc),
+    )
+    NotificationRepository(db_session).create(
+        user_id=user_id,
+        radar_id=radar.id,
+        radar_event_id=event.id,
+        title="Nova oportunidade encontrada!",
+        message="R$ 429",
+    )
+    db_session.commit()
+
+    response = client.delete(f"/radars/{radar.id}", headers=headers)
+
+    assert response.status_code == 204
 
 
 class TestIDOR:

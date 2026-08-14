@@ -13,12 +13,13 @@ class Settings(BaseSettings):
 
     # Supabase Auth (v0.4) — mesmo projeto Supabase já usado pro banco.
     # supabase_url: endpoint REST do projeto (ex: https://xxxx.supabase.co).
-    # supabase_anon_key: chave pública, usada nas chamadas de signup/login.
-    # supabase_jwt_secret: segredo HS256 do projeto (Settings > API > JWT Secret),
-    # usado só pra VALIDAR o token recebido — nunca pra assinar nada aqui.
+    # supabase_anon_key: "Publishable key" (Settings > API Keys) — chave
+    # pública, usada nas chamadas de signup/login.
+    # Não há SUPABASE_JWT_SECRET: o projeto assina tokens com chave
+    # assimétrica (ECC/ES256, Settings > JWT Keys) — a validação busca a
+    # chave pública via JWKS (core/auth.py), não um segredo compartilhado.
     supabase_url: str = ""
     supabase_anon_key: str = ""
-    supabase_jwt_secret: str = ""
 
 
 @lru_cache

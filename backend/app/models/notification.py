@@ -17,8 +17,10 @@ class Notification(TimestampedModel):
     __tablename__ = "notifications"
 
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), index=True)
-    radar_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("radars.id"))
-    radar_event_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("radar_events.id"))
+    radar_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("radars.id", ondelete="CASCADE"))
+    radar_event_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True), ForeignKey("radar_events.id", ondelete="CASCADE")
+    )
     type: Mapped[str] = mapped_column(String(32), default=OPPORTUNITY_FOUND)
     title: Mapped[str] = mapped_column(String(255))
     message: Mapped[str] = mapped_column(String(500))

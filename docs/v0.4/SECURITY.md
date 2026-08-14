@@ -22,6 +22,8 @@ Diferente do padrão "negar tudo" da v0.3 (onde `anon`/`authenticated` não tinh
 
 JWT do Supabase Auth validado no backend (assinatura + expiração) a cada requisição autenticada, via dependency do FastAPI (`core/auth.py`). `user_id` só existe no backend como resultado dessa validação — nunca aceito de body/query/param do cliente. Nenhum endpoint de `radars`/`notifications` aceita `user_id` como parâmetro de entrada.
 
+**Correção de achado real (DEC-111)**: a validação usa as chaves públicas do Supabase via JWKS (`/auth/v1/.well-known/jwks.json`, ES256), não um segredo HS256 compartilhado como planejado originalmente aqui — o painel do projeto (Settings > JWT Keys) mostrou que ele já usa o modelo novo de chaves assimétricas. Validado ao vivo: cadastro → login → token real → `GET /radars` autenticado.
+
 ## 4. IDOR — matriz de teste obrigatória
 
 Antes do release da v0.4.0, testar explicitamente (automatizado, não manual):

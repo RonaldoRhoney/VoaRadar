@@ -56,6 +56,22 @@ Achado real na FASE 5 (não hipotético): as migrations `0004`-`0007` concediam 
 
 **Custo aceito**: sem refresh automático de sessão nesta versão — o `access_token` expira (padrão do Supabase, ~1h) e o usuário precisa logar de novo. Registrado como limitação conhecida da v0.4.0, não como lacuna esquecida — refresh automático via `refresh_token` é candidato natural pra v0.4.x se o atrito for sentido no uso real.
 
+## DEC-111 — Validação de JWT via JWKS/ES256, não HS256 com segredo fixo
+
+Achado real ao configurar as chaves de verdade (2026-08-14): `SECURITY.md`/`ARCHITECTURE.md` previam validar o JWT do Supabase Auth com um `SUPABASE_JWT_SECRET` (HS256, segredo compartilhado). Ao abrir o painel do projeto (Settings > JWT Keys), o Supabase já tinha migrado esse projeto pras chaves assimétricas novas (ECC P-256/ES256) — a `Legacy JWT Secret` aparecia só como chave anterior, rotacionada 2 dias antes, válida só pra tokens já emitidos (que expiram em ~1h e já tinham expirado).
+
+**Correção**: `core/auth.py` passou a buscar as chaves públicas de assinatura no endpoint JWKS do próprio Supabase (`/auth/v1/.well-known/jwks.json`), cacheado em memória por 1h, casando o token pelo `kid` do header e validando com o algoritmo declarado (`ES256`). `SUPABASE_JWT_SECRET` foi removido de `Settings`/`.env`/`.env.example` — não existe mais no fluxo. Testado: 88/88 pytest (com par de chaves EC gerado em `conftest.py` e `get_jwks` sobrescrito via `dependency_overrides`, mesmo padrão de `get_db`) e validado ao vivo contra o Supabase real (cadastro → confirmação manual do e-mail de teste → login → token ES256 real validado pelo backend → `GET /radars` autenticado retornando 200).
+
+**Lição**: a documentação (`SECURITY.md`, `ARCHITECTURE.md`) foi escrita antes de olhar o painel real do projeto — o modelo de auth do Supabase mudou de HS256 pra ES256/JWKS como padrão em projetos novos, e a doc não podia saber disso sem verificar. Reforça `verificar-premissas` (skill RhoneyInc): specs escritas antes de olhar o painel/API real de um provedor terceiro são hipótese, não fato, até confirmar.
+
+## DEC-112 — `ON DELETE CASCADE` de `radars` para `radar_events`/`notifications`
+
+Achado real ao testar `DELETE /radars/{id}` ao vivo contra o Supabase (2026-08-14): as migrations `0005`-`0007` não declararam `ondelete="CASCADE"` nas FKs de `radar_id`/`radar_event_id`. Um Radar que já tinha disparado pelo menos uma vez (tinha `radar_events`/`notifications` associados) não podia ser apagado — `IntegrityError` cru, que viraria um 500 sem tratamento pro usuário (a API não tinha (nem devia ter) um `try/except IntegrityError` específico pra esse caso; a correção certa é o schema permitir a operação, não capturar o erro depois).
+
+**Correção**: migration `0009` — `ON DELETE CASCADE` em `radar_events.radar_id`, `notifications.radar_id` e `notifications.radar_event_id`. Um Radar é dono do seu log de eventos e das notificações que gerou; apagar o Radar apaga os dois junto, não deixa órfão nem bloqueia a exclusão. Models atualizados pra declarar o mesmo `ondelete` (documentação viva do schema real).
+
+**Lição de teste**: o teste automatizado original não pegou esse bug porque o SQLite dos testes não aplica `PRAGMA foreign_keys=ON` por padrão — FKs eram silenciosamente ignoradas, então até uma migration com FK errada "passava". Corrigido em `conftest.py` (liga o pragma na conexão de teste) — agora o SQLite se comporta como o Postgres real nesse aspecto, consistente com a filosofia de portabilidade já registrada em `docs/v0.3/DECISIONS.md` DEC-014.
+
 ## Melhoria futura identificada — skill `admin-padrao` (RhoneyInc)
 
 A skill `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`) exige que todo produto RhoneyInc com conceito de admin promova `rhoneyinc@gmail.com` automaticamente. A v0.4 introduz `profiles` (primeira tabela de usuário do Voa Radar), mas **sem** coluna `role` nem painel administrativo — não há "admin" a promover ainda, então a skill não se aplica hoje. Registrado aqui para não ser esquecido: no dia em que um papel de admin for desenhado pro Voa Radar (fora do escopo da v0.4, nenhum pedido do usuário até agora), aplicar o trigger `handle_new_user()` do mesmo padrão do hub RhoneyInc.

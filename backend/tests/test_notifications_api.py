@@ -1,4 +1,5 @@
 import uuid
+from datetime import date, datetime, timezone
 
 from app.repositories.notification_repository import NotificationRepository
 from app.repositories.price_history_repository import PriceHistoryRepository
@@ -12,6 +13,20 @@ def _seed_notification(db_session, user_id):
 
     origin = price_repo.get_or_create_airport("BEL", "Val-de-Cans", "Belém", "Brasil")
     destination = price_repo.get_or_create_airport("REC", "Guararapes", "Recife", "Brasil")
+    airline = price_repo.get_or_create_airline("AD", "Azul")
+    route = price_repo.get_or_create_route(origin.id, destination.id)
+    snapshot = price_repo.record_observation(
+        route_id=route.id,
+        airline_id=airline.id,
+        departure_date=date(2026, 10, 14),
+        return_date=date(2026, 10, 18),
+        stops=1,
+        duration_minutes=260,
+        provider="mock",
+        provider_offer_id="offer-rec-001",
+        price=429,
+        currency="BRL",
+    )
     radar = radar_repo.create(
         user_id=user_id,
         name="Meu Radar Recife",
@@ -21,10 +36,18 @@ def _seed_notification(db_session, user_id):
         condition_price=500,
     )
     db_session.flush()
+    event = radar_repo.record_match(
+        radar=radar,
+        price_snapshot_id=snapshot.id,
+        price=429,
+        score=100,
+        classification="EXCELLENT",
+        now=datetime.now(timezone.utc),
+    )
     notification = notification_repo.create(
         user_id=user_id,
         radar_id=radar.id,
-        radar_event_id=uuid.uuid4(),
+        radar_event_id=event.id,
         title="Nova oportunidade encontrada!",
         message="R$ 429, 31% abaixo da média histórica.",
     )
