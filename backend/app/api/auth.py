@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.core.auth import CurrentUser, get_current_user
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.repositories.profile_repository import ProfileRepository
-from app.schemas.auth import LoginRequest, SignupRequest, TokenResponse
+from app.schemas.auth import LoginRequest, MeResponse, SignupRequest, TokenResponse
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -89,6 +90,18 @@ def logout(credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_sc
         headers={**_auth_headers(), "Authorization": f"Bearer {credentials.credentials}"},
         timeout=10,
     )
+
+
+@router.get("/me", response_model=MeResponse)
+def me(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> MeResponse:
+    """`role` decidido só aqui, a partir de `profiles` — o frontend nunca
+    guarda/calcula isso, só reage ao que o backend devolve (SECURITY.md §2)."""
+    profile = ProfileRepository(db).get_or_create(current_user.id)
+    db.commit()
+    return MeResponse(id=current_user.id, email=current_user.email, role=profile.role)
 
 
 def _to_token_response(body: dict) -> TokenResponse | dict[str, str]:

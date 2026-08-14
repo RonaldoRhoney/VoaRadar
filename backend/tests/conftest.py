@@ -79,10 +79,10 @@ def make_auth_headers():
     aceitar — assinado com a chave EC de teste acima (`_TEST_JWKS` é o que
     o `client` fixture injeta no lugar do JWKS real do Supabase)."""
 
-    def _make(user_id: uuid.UUID | None = None) -> tuple[uuid.UUID, dict[str, str]]:
+    def _make(user_id: uuid.UUID | None = None, email: str | None = None) -> tuple[uuid.UUID, dict[str, str]]:
         user_id = user_id or uuid.uuid4()
         token = jwt.encode(
-            {"sub": str(user_id), "aud": "authenticated"},
+            {"sub": str(user_id), "aud": "authenticated", "email": email or f"{user_id}@example.com"},
             _TEST_KEY,
             algorithm="ES256",
             headers={"kid": _TEST_KID},

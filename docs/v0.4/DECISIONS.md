@@ -90,9 +90,15 @@ Achado de revisão manual: `routes` tem `CHECK (origin_airport_id != destination
 
 **Correção em 3 camadas**: `RadarCreate.model_validator` (schema), validação do estado final mesclado no `PUT` (mesmo mecanismo do DEC-114), e `CHECK` constraint no banco (migration `0010`, defesa em profundidade — mesmo princípio já estabelecido pra RLS).
 
-## Melhoria futura identificada — skill `admin-padrao` (RhoneyInc)
+## DEC-116 — Admin via skill `admin-padrao`: trigger no banco, não lógica no backend
 
-A skill `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`) exige que todo produto RhoneyInc com conceito de admin promova `rhoneyinc@gmail.com` automaticamente. A v0.4 introduz `profiles` (primeira tabela de usuário do Voa Radar), mas **sem** coluna `role` nem painel administrativo — não há "admin" a promover ainda, então a skill não se aplica hoje. Registrado aqui para não ser esquecido: no dia em que um papel de admin for desenhado pro Voa Radar (fora do escopo da v0.4, nenhum pedido do usuário até agora), aplicar o trigger `handle_new_user()` do mesmo padrão do hub RhoneyInc.
+Pedido explícito do usuário (2026-08-14): `rhoneyinc@gmail.com` vira admin do Voa Radar, com painel próprio (fora do escopo original da v0.4 — item registrado antes como "melhoria futura", agora implementado). Aplica a skill RhoneyInc `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`).
+
+**Por que trigger em `auth.users`, não código no `/auth/signup`**: o login social (Google, FASE C planejada) cria a linha em `auth.users` direto pelo Supabase Auth, sem nunca chamar o backend — qualquer lógica de promoção que vivesse só no endpoint de signup do backend nunca rodaria pra cadastro via Google. Um trigger `handle_new_user()` (migration `0011`, `SECURITY DEFINER`) cobre os dois caminhos de uma vez, mesma referência já usada no hub RhoneyInc.
+
+`profiles.role` (`user`/`admin`, default `user`) + `CHECK` constraint. `GET /auth/me` devolve `{id, email, role}` a partir do JWT validado + leitura de `profiles` — o frontend nunca decide/guarda isso sozinho, só reage ao que o backend confirma (mesmo princípio de `SECURITY.md` §2).
+
+**Validado ao vivo**: migration aplicada no Supabase real, trigger e função `SECURITY DEFINER` confirmados via `pg_trigger`/`pg_proc`; cadastro real de teste (e-mail diferente de `rhoneyinc@gmail.com`) confirmou `role='user'` atribuído automaticamente pelo trigger — mesma lógica que atribui `role='admin'` na correspondência exata do e-mail. Não criei a conta `rhoneyinc@gmail.com` de verdade nesta sessão (é a conta real do usuário — ele deve criá-la pelo fluxo normal de cadastro, com a senha que escolher).
 
 ## Pendência herdada da v0.3 — resolvida
 

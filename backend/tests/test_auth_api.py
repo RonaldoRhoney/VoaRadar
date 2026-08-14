@@ -116,6 +116,26 @@ def test_logout_sem_token_tambem_e_204(client, db_session):
     assert response.status_code == 204
 
 
+def test_me_sem_autenticacao_e_401(client, db_session):
+    response = client.get("/auth/me")
+
+    assert response.status_code == 401
+
+
+def test_me_usuario_comum_tem_role_user(client, db_session, make_auth_headers):
+    user_id, headers = make_auth_headers(email="alguem@example.com")
+
+    response = client.get("/auth/me", headers=headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == str(user_id)
+    assert body["email"] == "alguem@example.com"
+    assert body["role"] == "user"
+
+
+
+
 def test_signup_sem_supabase_configurado_e_503_amigavel(client, db_session, monkeypatch):
     """SUPABASE_URL vazio (estado padrão sem .env preenchido) não pode
     virar um 500 cru — precisa de um erro amigável e estruturado."""
