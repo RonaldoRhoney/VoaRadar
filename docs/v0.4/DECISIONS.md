@@ -94,6 +94,6 @@ Achado de revisão manual: `routes` tem `CHECK (origin_airport_id != destination
 
 A skill `admin-padrao` (`.claude/skills/admin-padrao/SKILL.md`) exige que todo produto RhoneyInc com conceito de admin promova `rhoneyinc@gmail.com` automaticamente. A v0.4 introduz `profiles` (primeira tabela de usuário do Voa Radar), mas **sem** coluna `role` nem painel administrativo — não há "admin" a promover ainda, então a skill não se aplica hoje. Registrado aqui para não ser esquecido: no dia em que um papel de admin for desenhado pro Voa Radar (fora do escopo da v0.4, nenhum pedido do usuário até agora), aplicar o trigger `handle_new_user()` do mesmo padrão do hub RhoneyInc.
 
-## Pendência herdada da v0.3
+## Pendência herdada da v0.3 — resolvida
 
-Tag `v0.3.1` ainda não foi cortada para os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) — decisão já aprovada pelo usuário, execução ficou pausada quando o foco mudou para o planejamento da v0.4. Não bloqueia o início da v0.4, mas deve ser resolvida antes ou junto do início da FASE 5 do código, pra manter o histórico de tags coerente.
+Tag `v0.3.1` cortada em 2026-08-14 (commit `4ce0d72`), cobrindo os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E que faltava. Ver `docs/v0.3/ACCEPTANCE.md`.

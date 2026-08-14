@@ -91,4 +91,4 @@
 - [x] Tag `v0.3.0`.
 - [x] Push.
 
-> Nota: 2 commits de segurança (`b36e624`, `a7c698b`) entraram **depois** da tag `v0.3.0` — o código em `main` está mais seguro do que o commit que a tag aponta. Ver pergunta ao usuário sobre cortar `v0.3.1`.
+- [x] Tag `v0.3.1` (2026-08-14, cortada em `4ce0d72`) — cobre os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E do Price Intelligence que faltava. Pendência resolvida.
