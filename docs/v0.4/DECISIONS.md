@@ -100,6 +100,18 @@ Pedido explícito do usuário (2026-08-14): `rhoneyinc@gmail.com` vira admin do 
 
 **Validado ao vivo**: migration aplicada no Supabase real, trigger e função `SECURITY DEFINER` confirmados via `pg_trigger`/`pg_proc`; cadastro real de teste (e-mail diferente de `rhoneyinc@gmail.com`) confirmou `role='user'` atribuído automaticamente pelo trigger — mesma lógica que atribui `role='admin'` na correspondência exata do e-mail. Não criei a conta `rhoneyinc@gmail.com` de verdade nesta sessão (é a conta real do usuário — ele deve criá-la pelo fluxo normal de cadastro, com a senha que escolher).
 
+## DEC-117 — "RhoneyInc Zero-Cost API First": discovery de providers, nenhuma implementação ainda
+
+Pedido do usuário (2026-08-16): formalizar "custo R$ 0" como restrição arquitetural, não preferência, e avaliar `FlightProvider` real (Amadeus, OpenSky, Aviationstack, ANAC) antes de qualquer código. Nova skill institucional RhoneyInc criada: `MyApps/.claude/skills/zero-cost-api/SKILL.md`.
+
+**Verificação real corrigiu 2 premissas da proposta original antes de desenhar arquitetura**: Amadeus Self-Service (o "ambiente de teste gratuito" proposto) foi **descontinuado de vez em 17/jul/2026** — confirmado por múltiplas fontes independentes (PhocusWire, LinkedIn, TravelTrade), não é mais uma opção, nem em teste. OpenSky Network e Aviationstack são APIs reais e gratuitas, mas **nenhuma das duas fornece preço de passagem** — só rastreamento de posição (OpenSky, ADS-B) e status/horário de voo (Aviationstack), respectivamente; OpenSky também restringe uso a não-comercial. Das 4 fontes avaliadas, só a **ANAC** (dados abertos, download CSV direto do site oficial, sem token) sobrou como viável — e mesmo essa só como referência histórica mensal, nunca oferta comprável em tempo real (papel que a proposta original já reservava corretamente pra ela).
+
+**Distinção arquitetural registrada**: `FlightProvider` (interface já existente desde v0.1, `base.py`) é pra oferta comprável — `MockFlightProvider` continua sendo o único implementado. ANAC vira um componente **diferente**, `FareReferenceProvider` (proposto, não implementado), porque misturar "oferta" com "média histórica" na mesma interface seria enganoso pro usuário.
+
+**Documentos criados** (`docs/DATA_SOURCES.md`, `docs/API_LIMITS.md`, `docs/LICENSES.md`, `docs/PROVIDER_ARCHITECTURE.md`) — nenhuma linha de código alterada, aguardando aprovação explícita antes de implementar `AnacFareProvider`/tabela `anac_fare_reference`/integração no Price Intelligence.
+
+**Correção de comunicação registrada**: nunca prometer "consulta Azul/GOL/LATAM diretamente" — nenhuma integração com companhia aérea existe ou está planejada. Comunicação correta: "combina fontes públicas e provedores de dados de aviação".
+
 ## Pendência herdada da v0.3 — resolvida
 
 Tag `v0.3.1` cortada em 2026-08-14 (commit `4ce0d72`), cobrindo os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E que faltava. Ver `docs/v0.3/ACCEPTANCE.md`.

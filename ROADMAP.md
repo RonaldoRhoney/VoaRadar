@@ -54,13 +54,19 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 **Achado crítico corrigido**: nenhuma tabela tinha Row Level Security habilitado, e `anon`/`authenticated` (papéis da API REST pública do Supabase) tinham `SELECT/INSERT/UPDATE/DELETE/TRUNCATE` liberados em todas as 5 tabelas — qualquer pessoa com a chave `anon` pública conseguia ler ou apagar o histórico de preço direto pelo Supabase, sem passar pelo backend. Corrigido com a migration `0002` (RLS habilitado + grants revogados nas 5 tabelas), sem nenhum efeito no backend (que acessa como dono da tabela, `rolbypassrls=true`). Regras de negócio reauditadas: confirmado que score/classificação/status de orçamento só existem no backend, frontend só filtra/ordena o que já vem calculado. Detalhe completo em [docs/v0.3/AUDIT_SECURITY.md](docs/v0.3/AUDIT_SECURITY.md) e `docs/v0.3/DECISIONS.md` DEC-021.
 
+## v0.4 — Radar & Alertas
+
+**STATUS: FECHADA** (tag `v0.4.0`, 2026-08-14) — documentação completa em [docs/v0.4/](docs/v0.4/). FASE 0-10 concluídas: modelo Radar, regras de disparo, monitoramento, RLS/segurança, backend (auth real via Supabase, radar engine, evaluation service), frontend (login, Meus Radares, central de notificações), 92/92 pytest, Bandit limpo, 16/16 Vitest, 7/7 E2E, checklist formal das 5 falhas de vibe coding. *(Item corrigido nesta revisão — este arquivo listava "Alertas (v0.4)" como pendente por desatualização, quando já estava lançada.)*
+
+**Extensão pós-release, em andamento**: Admin padrão (`rhoneyinc@gmail.com`) — só **FASE A** concluída (`profiles.role` + trigger + `GET /auth/me`, DEC-116). FASE B (painel admin) ainda não definida em detalhe; FASE C (login social Google) mencionada como planejada.
+
 ## Próximo
 
-- [ ] Admin padrão (`rhoneyinc@gmail.com`) no Supabase do Voa Radar — o banco já está conectado (v0.3), mas provisionamento de admin/auth ainda não, por ser território de login (fora do escopo até v1.0, ver [[voaradar_admin_login_pattern]] na memória do projeto).
 - [ ] Deploy (Vercel) — frontend e backend. **Lembrete da auditoria**: `CORS_ORIGINS` no backend hoje só libera `http://localhost:5173` — precisa incluir o domínio real no deploy, senão o frontend em produção não consegue falar com a API (testado: o build de produção rodando em outra porta local já é bloqueado por CORS).
-- [ ] Integração com fonte real de dados de voo via `FlightProvider` (Amadeus for Developers, sandbox, ou outro — decisão adiada por instabilidade recente sinalizada no acesso self-service do Amadeus, ver `docs/v0.3/DECISIONS.md` DEC-009).
 - [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
-- [ ] Alertas (v0.4).
+- [ ] Admin — FASE B (painel) e FASE C (login social Google), ainda sem plano detalhado.
+- [ ] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117) — discovery completo em `docs/DATA_SOURCES.md`/`API_LIMITS.md`/`LICENSES.md`/`PROVIDER_ARCHITECTURE.md`. Achado real: Amadeus Self-Service (a opção considerada) foi descontinuado em 17/jul/2026; OpenSky/Aviationstack não fornecem preço de passagem. Único caminho viável agora: ANAC como `FareReferenceProvider` (referência histórica, `ZERO_COST`) — **aguardando aprovação**, nenhum código implementado ainda. `MockFlightProvider` continua sendo o único provider de oferta comprável.
+- [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.
 - [ ] Inteligência artificial / recomendações (v0.5).
 
 ## Sugestões futuras registradas (não implementadas)

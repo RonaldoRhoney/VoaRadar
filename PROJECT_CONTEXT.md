@@ -48,4 +48,10 @@ Vender diretamente passagens no MVP; fingir que possui dados reais quando não p
 
 v0.1 e v0.2 concluídas: exploração de destinos por orçamento, múltiplas ofertas por destino, filtros e ordenação, tudo com **dados mock** (frontend e backend), claramente marcados como tal no código (`MOCK DATA` / `MockFlightProvider`). Nenhuma integração com fonte real de dados de voo ainda.
 
-v0.3 em fechamento: Supabase (Postgres) conectado e populado com histórico de exemplo; motor de Price Intelligence (mínimo/máximo/média/mediana/score/confiança, estatística transparente, sem fabricar inteligência) funcionando de ponta a ponta — API (`GET /flights/price-intelligence/{offer_id}`) e frontend (badge de oportunidade, explicação, gráfico de histórico) validados contra dado real no Supabase. Detalhe completo em [ROADMAP.md](ROADMAP.md), [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/) e [docs/v0.3/](docs/v0.3/).
+v0.3 fechada: Supabase (Postgres) conectado e populado com histórico de exemplo; motor de Price Intelligence (mínimo/máximo/média/mediana/score/confiança, estatística transparente, sem fabricar inteligência) funcionando de ponta a ponta — API (`GET /flights/price-intelligence/{offer_id}`) e frontend (badge de oportunidade, explicação, gráfico de histórico) validados contra dado real no Supabase.
+
+v0.4 fechada: Radar & Alertas (monitoramento de rota, disparo por regra, central de notificações, auth real via Supabase) — tag `v0.4.0`. Extensão pós-release em andamento: Admin padrão (só FASE A concluída até agora).
+
+**"RhoneyInc Zero-Cost API First" (2026-08-16)**: nenhuma fonte externa entra em produção com risco de cobrança automática (skill `zero-cost-api`, `MyApps/.claude/skills/`). `MockFlightProvider` continua sendo o único provider de oferta comprável — nenhuma integração real de companhia aérea existe ainda. ANAC (dados abertos, gratuita) está projetada como fonte de referência histórica (não oferta), aguardando aprovação de implementação. Ver `docs/DATA_SOURCES.md`/`PROVIDER_ARCHITECTURE.md`.
+
+Detalhe completo em [ROADMAP.md](ROADMAP.md), [docs/v0.1/](docs/v0.1/), [docs/v0.2/](docs/v0.2/), [docs/v0.3/](docs/v0.3/) e [docs/v0.4/](docs/v0.4/).
