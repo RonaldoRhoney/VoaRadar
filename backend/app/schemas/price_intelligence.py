@@ -12,6 +12,17 @@ class PriceHistoryPoint(BaseModel):
     observed_at: datetime
 
 
+class AnacReference(BaseModel):
+    """Referência histórica da ANAC — NUNCA uma oferta comprável, só um
+    sinal estatístico a mais (PROVIDER_ARCHITECTURE.md §2). Ausente
+    (campo None em PriceIntelligence) quando não há dado importado pra
+    essa rota — nunca inventado/estimado."""
+
+    average_fare: float
+    reference_month: str
+    source_url: str
+
+
 class PriceIntelligence(BaseModel):
     current_price: float
     sample_size: int
@@ -30,3 +41,8 @@ class PriceIntelligence(BaseModel):
     # Só pro gráfico (UX.md §5) — a análise em si usa as estatísticas acima,
     # não essa série crua.
     history: list[PriceHistoryPoint] = []
+
+    # Referência ANAC (DEC-117/PROVIDER_ARCHITECTURE.md) — None quando não
+    # há dado importado pra essa rota. Nunca substitui o Analytics Engine
+    # (que já funciona só com o histórico de oferta próprio), só complementa.
+    anac_reference: AnacReference | None = None

@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.providers.anac_provider import AnacFareProvider
+from app.repositories.anac_fare_repository import AnacFareRepository
 from app.repositories.price_history_repository import PriceHistoryRepository
 from app.schemas.price_intelligence import PriceIntelligence
 from app.services.price_intelligence_service import PriceIntelligenceService
@@ -23,7 +25,10 @@ def get_price_intelligence(
     ),
     db: Session = Depends(get_db),
 ):
-    service = PriceIntelligenceService(PriceHistoryRepository(db))
+    service = PriceIntelligenceService(
+        PriceHistoryRepository(db),
+        fare_reference_provider=AnacFareProvider(AnacFareRepository(db)),
+    )
     result = service.analyze_offer(offer_id, current_price=price)
 
     if result is None:
