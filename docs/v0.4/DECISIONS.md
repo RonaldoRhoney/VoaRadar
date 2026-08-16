@@ -130,6 +130,19 @@ Pedido do usuário (2026-08-16): "implemente" (autorização explícita do plano
 
 **Pendente**: domínio próprio `voaradar.rhoneyinc.com` (hoje só existem URLs `*.vercel.app` padrão), entrada no hub RhoneyInc e nos rodapés dos produtos-irmãos.
 
+## DEC-119 — Voa Radar publicado nos padrões RhoneyInc (skill `novo-app-no-ar`)
+
+Pedido do usuário (2026-08-16): "publique o VoaRadar com os mesmo padrões RhoneyInc". Aplicado o checklist da skill institucional `novo-app-no-ar`:
+
+- **Domínio**: `voaradar.rhoneyinc.com` criado via `vercel domains add` apontando pro projeto `voaradar-frontend` — confirmado ao vivo (HTTP 200), sem precisar mexer em DNS externo (o domínio `rhoneyinc.com` já é registrado no próprio Vercel).
+- **Ícone**: `RhoneyInc/assets/voaradar-icon.svg` criado seguindo o padrão dos demais produtos (mesma estrutura de `vagalume-icon.svg`), cor de acento `#34E0A1` (o verde já usado no produto, `--color-radar-400`).
+- **Registro em `softwares`** (tabela do hub RhoneyInc, Supabase `crkryabvsmlraizaurnk`): inserido com `status='em_desenvolvimento'` — decisão consciente, não "no ar" = "pronto pro público" (mesmo princípio já aplicado ao AmaVida/KnowRa/MontaMovel): hoje o Voa Radar só tem `MockFlightProvider` (dado fictício, nunca preço real) e o admin (FASE B/C) ainda não foi implementado. `ordem=10`, `link_url` e `logo_url` apontando pro domínio e ícone reais.
+- **Rodapé do hub**: link adicionado em `RhoneyInc/index.html` (coluna "Produtos"), apontando direto pro domínio do produto (não existe uma página `voaradar.html` de marketing dentro do site RhoneyInc, diferente dos demais — ver "melhoria futura" abaixo).
+- **Rodapé do próprio produto**: já seguia a skill `footer-padrao` desde antes, nenhuma correção necessária.
+- Hub redeployado (`vercel --prod` em `RhoneyInc/`, padrão do projeto — não é push-triggered) e verificado ao vivo: link "Voa Radar" presente no HTML servido em produção.
+
+**Melhoria futura identificada** (não implementada, fora de escopo desta tarefa): os demais produtos têm uma página de marketing dedicada dentro do próprio site RhoneyInc (`vagalume.html`, `amavida.html` etc., usada nos cards "Saiba mais →" de uma seção estática mais antiga da home, separada do carrossel dinâmico) — o Voa Radar não tem equivalente. Também faltam `privacidade.html`/`termos.html`/`contato.html` no próprio `voaradar.rhoneyinc.com` (retornam 404 hoje), presentes em todos os produtos-irmãos já publicados. Ambos exigem conteúdo específico (copy de marketing, texto LGPD) que não deveria ser escrito silenciosamente — registrado aqui para decisão explícita do usuário.
+
 ## Pendência herdada da v0.3 — resolvida
 
 Tag `v0.3.1` cortada em 2026-08-14 (commit `4ce0d72`), cobrindo os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E que faltava. Ver `docs/v0.3/ACCEPTANCE.md`.
