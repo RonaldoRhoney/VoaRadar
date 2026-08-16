@@ -112,6 +112,24 @@ Pedido do usuário (2026-08-16): formalizar "custo R$ 0" como restrição arquit
 
 **Correção de comunicação registrada**: nunca prometer "consulta Azul/GOL/LATAM diretamente" — nenhuma integração com companhia aérea existe ou está planejada. Comunicação correta: "combina fontes públicas e provedores de dados de aviação".
 
+## DEC-118 — `AnacFareProvider` implementado (PA.1-PA.4) e primeiro deploy de produção do Voa Radar
+
+Pedido do usuário (2026-08-16): "implemente" (autorização explícita do plano do DEC-117) seguido de "faça o deploy".
+
+**Implementado**: `AnacFareProvider`/`FareReferenceProvider` (`app/providers/`), repositório `AnacFareRepository`, modelo `AnacFareReference` e migration `0012` (tabela `anac_fare_reference`, RLS habilitada, sem grants para `anon`/`authenticated` — mesmo padrão de `price_history`). `PriceIntelligenceService` ganhou `fare_reference_provider` opcional; ausência da fonte nunca quebra a resposta (`anac_reference: null`), só omite o campo. Endpoint `/flights/price-intelligence/{offer_id}` já injeta o provider real.
+
+**Não implementado ainda, deliberadamente**: `scripts/import_anac_fares.py`. O schema real do CSV da ANAC não foi verificado — o download de tarifas está atrás de uma ferramenta de consulta interativa no site oficial, não um link estático, e o acesso direto ao domínio `anac.gov.br` falhou a partir do sandbox. Nomes de coluna usados em qualquer rascunho anterior (EMPRESA/ANO/MES etc.) eram suposição de busca genérica, não confirmados contra um arquivo real — não seriam implementados sem essa verificação, por princípio (`CLAUDE.md` §2). Pendente: usuário baixar uma amostra real do CSV, ou investigar o mecanismo de exportação da ferramenta interativa.
+
+**Testado**: 94/94 testes passando (nenhuma regressão). Validado ao vivo em produção via `/flights/price-intelligence/offer-rec-001?price=429` — campo `anac_reference: null` presente e correto (nenhuma rota tem referência ANAC importada ainda, comportamento esperado).
+
+**Primeiro deploy de produção do Voa Radar** (frontend + backend), na Vercel:
+- Backend (`voaradar-api`): `@vercel/python`, entrypoint `backend/api/index.py` expondo o mesmo app FastAPI de sempre. `requirements.txt` precisou ser uma lista flat de pacotes — a Vercel não suporta a diretiva `-r requirements/base.txt` usada localmente ("could not parse requirements.txt"). 5 env vars de produção configuradas (`DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `ENVIRONMENT`, `CORS_ORIGINS`).
+- Frontend (`voaradar-frontend`): build Vite padrão, env var `VITE_API_BASE_URL` apontando pro backend real.
+- **Gotcha novo pro padrão RhoneyInc**: projetos novos na Vercel nascem com "Deployment Protection" (SSO) ativado por padrão em `*.vercel.app`, retornando 302 (redirect pro login Vercel) em vez de servir o conteúdo — mesmo com env vars e build corretos. Corrigido via `PATCH https://api.vercel.com/v9/projects/{id}?teamId={team}` com `{"ssoProtection": null}` (não existe toggle direto no `vercel.json`). Necessário em ambos os projetos (backend e frontend). Vale registrar como passo do checklist "novo app no ar" pra não repetir o diagnóstico do zero da próxima vez.
+- CORS do backend liberado explicitamente para os domínios estáveis do frontend (`voaradar-frontend-ronaldorhoneys-projects.vercel.app` e o alias curto `frontend-seven-theta-82.vercel.app`), verificado via `OPTIONS` com header `Origin` real — `access-control-allow-origin` correto.
+
+**Pendente**: domínio próprio `voaradar.rhoneyinc.com` (hoje só existem URLs `*.vercel.app` padrão), entrada no hub RhoneyInc e nos rodapés dos produtos-irmãos.
+
 ## Pendência herdada da v0.3 — resolvida
 
 Tag `v0.3.1` cortada em 2026-08-14 (commit `4ce0d72`), cobrindo os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E que faltava. Ver `docs/v0.3/ACCEPTANCE.md`.

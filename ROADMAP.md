@@ -62,14 +62,15 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 ## Próximo
 
-- [ ] Deploy (Vercel) — frontend e backend. **Lembrete da auditoria**: `CORS_ORIGINS` no backend hoje só libera `http://localhost:5173` — precisa incluir o domínio real no deploy, senão o frontend em produção não consegue falar com a API (testado: o build de produção rodando em outra porta local já é bloqueado por CORS).
+- [x] Deploy (Vercel) — frontend e backend. **Concluído 2026-08-16** (DEC-118): `voaradar-api` (backend) e `voaradar-frontend` (frontend), ambos em produção, CORS liberado pro domínio real, `ssoProtection` desativado em ambos os projetos. Só URLs `*.vercel.app` padrão por enquanto — domínio próprio `voaradar.rhoneyinc.com` e entrada no hub/rodapés seguem pendentes.
+- [x] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117/DEC-118) — `AnacFareProvider`/`FareReferenceProvider` implementado e em produção (`anac_reference` no Price Intelligence, opcional, nunca quebra a resposta). Pendente: `scripts/import_anac_fares.py` — schema real do CSV da ANAC ainda não verificado (ferramenta de consulta interativa, não link estático; acesso ao domínio falhou do sandbox). Sem esse script, a tabela `anac_fare_reference` fica vazia e `anac_reference` sempre `null` em produção.
 - [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
 - [ ] Admin — FASE B (painel) e FASE C (login social Google), ainda sem plano detalhado.
-- [ ] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117) — discovery completo em `docs/DATA_SOURCES.md`/`API_LIMITS.md`/`LICENSES.md`/`PROVIDER_ARCHITECTURE.md`. Achado real: Amadeus Self-Service (a opção considerada) foi descontinuado em 17/jul/2026; OpenSky/Aviationstack não fornecem preço de passagem. Único caminho viável agora: ANAC como `FareReferenceProvider` (referência histórica, `ZERO_COST`) — **aguardando aprovação**, nenhum código implementado ainda. `MockFlightProvider` continua sendo o único provider de oferta comprável.
 - [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.
 - [ ] Inteligência artificial / recomendações (v0.5).
 
 ## Sugestões futuras registradas (não implementadas)
 
 - Autenticação de usuário / contas / buscas salvas / alertas de preço.
-- Deploy do backend FastAPI na Vercel via runtime Python (alternativa a outro host).
+- Domínio próprio `voaradar.rhoneyinc.com` + entrada no hub RhoneyInc e nos rodapés dos produtos-irmãos.
+- Checklist "novo app no ar" da RhoneyInc deveria incluir o passo de desativar `ssoProtection` via API da Vercel — todo projeto novo nasce com isso ligado, bloqueando acesso público mesmo com build e env vars corretos (achado real do deploy do Voa Radar, DEC-118).
