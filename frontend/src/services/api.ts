@@ -369,6 +369,7 @@ interface RadarWire {
   condition_classification: string | null;
   created_at: string;
   updated_at: string;
+  progress: number | null;
 }
 
 function mapRadar(radar: RadarWire): Radar {
@@ -385,6 +386,7 @@ function mapRadar(radar: RadarWire): Radar {
     conditionClassification: radar.condition_classification,
     createdAt: radar.created_at,
     updatedAt: radar.updated_at,
+    progress: radar.progress,
   };
 }
 

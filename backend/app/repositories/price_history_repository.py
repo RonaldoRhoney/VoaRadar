@@ -125,6 +125,17 @@ class PriceHistoryRepository:
     def get_route(self, route_id: uuid.UUID) -> Route | None:
         return self._session.get(Route, route_id)
 
+    def find_route(self, origin_airport_id: uuid.UUID, destination_airport_id: uuid.UUID) -> Route | None:
+        """Só consulta — nunca cria (diferente de get_or_create_route).
+        Usado pra saber se já existe histórico de coleta pra uma rota sem
+        efeito colateral de criar uma Route vazia só por causa de uma
+        leitura (ex: calcular progresso de um Radar)."""
+        return (
+            self._session.query(Route)
+            .filter_by(origin_airport_id=origin_airport_id, destination_airport_id=destination_airport_id)
+            .one_or_none()
+        )
+
     def find_route_id_by_provider_offer_id(self, provider_offer_id: str) -> uuid.UUID | None:
         observation = (
             self._session.query(FlightObservation)

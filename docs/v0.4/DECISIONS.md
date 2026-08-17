@@ -270,3 +270,18 @@ Pedido do usuário: "percebi que o App todo está lento, demora carregar, invest
 **Testado**: build limpo, 16/16 testes de frontend, lint (`oxlint`) limpo. Ao vivo em produção: `voaradar.rhoneyinc.com` e `/radares` carregando normalmente após o deploy, `x-vercel-id` confirmado como `gru1::gru1` (edge e função na mesma região agora).
 
 **Não escopo desta correção, registrado como melhoria futura**: o chunk principal ainda carrega bibliotecas usadas só no `Results` (gráfico de calendário de preço, etc.) — dividir por sub-feature dentro da própria página é um ganho menor e mais trabalhoso, não pareceu justificar o escopo desta correção pontual de performance.
+
+## DEC-127 — Barra de progresso no card do Radar (2026-08-17)
+
+Pedido do usuário: "acho interessante que houvesse uma espécie de barra de progresso para mostrar alguma expectativa, e não só 'ativado'." Antes de codificar, perguntado como calcular essa "expectativa" pros dois tipos de condição do Radar — respostas do usuário: (1) PRICE_BELOW → menor preço já visto na rota vs. o alvo; (2) OPPORTUNITY_CLASSIFICATION → reaproveitar o score de oportunidade que o Price Intelligence já calcula. Mesmo princípio anti-fabricação do DEC-125: nunca inventar um número, só usar dado real já coletado.
+
+**Backend**: `RadarProgressService` (novo) — `PriceHistoryRepository.find_route` (novo, só consulta, nunca cria rota) localiza a `Route` da origem/destino do Radar; sem rota ou sem `price_snapshots` ainda, `progress` é `None` (não `0` — `0%` diria "sabemos e é ruim", `None` é honesto sobre "ainda não sabemos"). PRICE_BELOW: `condition_price / menor_preço_histórico * 100`, limitado a 100. OPPORTUNITY_CLASSIFICATION: reaproveita `analyze_price` (mesmo Analytics Engine do Price Intelligence, `PRICE_INTELLIGENCE.md` §6) aplicado ao preço mais recente observado — não cria uma segunda escala de pontuação. `RadarOut` ganhou o campo `progress: int | None`, calculado nos 4 endpoints (`create`/`list`/`get`/`update`).
+
+**Frontend**: `RadarCard` — barra fina (Tailwind, sem lib nova) abaixo do cabeçalho do card, só renderizada quando `progress !== null`; cor muda com o valor (cinza < 60%, azul 60-89%, verde ≥ 90%). Legenda diferente por tipo de condição ("X% do caminho até R$ Y" vs. "Score de oportunidade: X/100").
+
+**Testado**:
+- 7 testes novos de backend (3 em `test_price_history_repository.py` pro `find_route`; 4 em `test_radar_progress_service.py` cobrindo: sem histórico → `None`, cálculo correto do PRICE_BELOW, clamp em 100%, score do OPPORTUNITY_CLASSIFICATION). 117/117 testes de backend passando, Bandit limpo.
+- Build, 16/16 testes de frontend e lint (`oxlint`) continuam limpos.
+- **Ao vivo em produção, com dado real já existente** (rota BEL→REC, seed histórico de `scripts/seed_history.py`, preços 429/462/531): Radar `PRICE_BELOW` com alvo R$500 devolveu `progress: 100` (500/429 = 116%, limitado a 100 — confere, o alvo já foi batido pelo menor preço visto). Radar `OPPORTUNITY_CLASSIFICATION` devolveu `progress: 0` (o snapshot mais recente é R$531, o mais caro do histórico — confere, pior score possível nesse momento). Radares e usuário de teste removidos depois.
+
+Deploy de produção atualizado (backend e frontend).

@@ -26,6 +26,19 @@ function datesLabel(radar: Radar): string | null {
   return formatDate(radar.departureDate ?? radar.returnDate!);
 }
 
+function progressLabel(radar: Radar): string {
+  if (radar.conditionType === "PRICE_BELOW") {
+    return `${radar.progress}% do caminho até ${formatCurrencyBRL(radar.conditionPrice ?? 0)}`;
+  }
+  return `Score de oportunidade: ${radar.progress}/100`;
+}
+
+function progressColor(progress: number): string {
+  if (progress >= 90) return "bg-radar-400";
+  if (progress >= 60) return "bg-sky-400";
+  return "bg-white/30";
+}
+
 export function RadarCard({
   radar,
   airports,
@@ -58,6 +71,18 @@ export function RadarCard({
           {isActive ? "🟢 ATIVO" : "⚪ PAUSADO"}
         </span>
       </div>
+
+      {radar.progress !== null && (
+        <div className="mt-1">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className={`h-full rounded-full transition-all ${progressColor(radar.progress)}`}
+              style={{ width: `${radar.progress}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-white/40">{progressLabel(radar)}</p>
+        </div>
+      )}
 
       <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
         <Link to={`/radares/${radar.id}/editar`} className="text-sky-400 hover:underline">

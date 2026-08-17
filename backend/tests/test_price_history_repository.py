@@ -83,6 +83,36 @@ def test_different_itinerary_creates_a_new_flight_observation(db_session):
     assert sorted(repo.get_price_history(route.id)) == [429.0, 429.0]
 
 
+def test_find_route_returns_none_when_no_route_exists(db_session):
+    repo = PriceHistoryRepository(db_session)
+    origin = repo.get_or_create_airport("BEL", "Val-de-Cans", "Belém", "Brasil")
+    destination = repo.get_or_create_airport("REC", "Guararapes", "Recife", "Brasil")
+
+    assert repo.find_route(origin.id, destination.id) is None
+
+
+def test_find_route_never_creates_a_route(db_session):
+    from app.models import Route
+
+    repo = PriceHistoryRepository(db_session)
+    origin = repo.get_or_create_airport("BEL", "Val-de-Cans", "Belém", "Brasil")
+    destination = repo.get_or_create_airport("REC", "Guararapes", "Recife", "Brasil")
+
+    repo.find_route(origin.id, destination.id)
+
+    assert db_session.query(Route).count() == 0
+
+
+def test_find_route_returns_existing_route(db_session):
+    repo = PriceHistoryRepository(db_session)
+    route, _ = _make_route(repo)
+
+    found = repo.find_route(route.origin_airport_id, route.destination_airport_id)
+
+    assert found is not None
+    assert found.id == route.id
+
+
 def test_get_price_history_is_scoped_to_route(db_session):
     repo = PriceHistoryRepository(db_session)
     route_a, airline = _make_route(repo)

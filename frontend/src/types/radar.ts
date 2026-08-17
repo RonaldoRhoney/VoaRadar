@@ -21,4 +21,8 @@ export interface Radar {
   conditionClassification: string | null;
   createdAt: string;
   updatedAt: string;
+  // 0-100, calculado a partir do histórico real de preço da rota; null
+  // quando ainda não há dado suficiente pra estimar (nunca 0 por padrão —
+  // ver RadarProgressService no backend).
+  progress: number | null;
 }

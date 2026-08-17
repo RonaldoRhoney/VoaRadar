@@ -6,8 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import get_current_user_id
 from app.core.database import get_db
+from app.models.radar import Radar
+from app.repositories.price_history_repository import PriceHistoryRepository
 from app.repositories.radar_repository import RadarNotFoundError, RadarRepository
 from app.schemas.radar import RadarCreate, RadarOut, RadarUpdate
+from app.services.radar_progress_service import RadarProgressService
 
 router = APIRouter(prefix="/radars", tags=["radars"])
 
@@ -16,6 +19,11 @@ FRIENDLY_INVALID_AIRPORT = "Origem ou destino inválidos."
 FRIENDLY_INVALID_CONDITION = "Condição do Radar incompleta — confira o valor ou a classificação escolhida."
 FRIENDLY_SAME_AIRPORT = "Origem e destino não podem ser o mesmo aeroporto."
 FRIENDLY_RETURN_BEFORE_DEPARTURE = "A data de volta não pode ser anterior à data de ida."
+
+
+def _to_out(radar: Radar, progress_service: RadarProgressService) -> RadarOut:
+    progress = progress_service.compute(radar)
+    return RadarOut.model_validate(radar).model_copy(update={"progress": progress})
 
 
 @router.post("", response_model=RadarOut, status_code=201)
@@ -31,7 +39,7 @@ def create_radar(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail=FRIENDLY_INVALID_AIRPORT)
-    return radar
+    return _to_out(radar, RadarProgressService(PriceHistoryRepository(db)))
 
 
 @router.get("", response_model=list[RadarOut])
@@ -39,7 +47,9 @@ def list_radars(
     user_id: uuid.UUID = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ) -> list[RadarOut]:
-    return RadarRepository(db).list_for_user(user_id)
+    progress_service = RadarProgressService(PriceHistoryRepository(db))
+    radars = RadarRepository(db).list_for_user(user_id)
+    return [_to_out(radar, progress_service) for radar in radars]
 
 
 @router.get("/{radar_id}", response_model=RadarOut)
@@ -49,9 +59,10 @@ def get_radar(
     db: Session = Depends(get_db),
 ) -> RadarOut:
     try:
-        return RadarRepository(db).get_owned(radar_id, user_id)
+        radar = RadarRepository(db).get_owned(radar_id, user_id)
     except RadarNotFoundError:
         raise HTTPException(status_code=404, detail=FRIENDLY_NOT_FOUND)
+    return _to_out(radar, RadarProgressService(PriceHistoryRepository(db)))
 
 
 @router.put("/{radar_id}", response_model=RadarOut)
@@ -96,7 +107,7 @@ def update_radar(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail=FRIENDLY_INVALID_AIRPORT)
-    return radar
+    return _to_out(radar, RadarProgressService(PriceHistoryRepository(db)))
 
 
 @router.delete("/{radar_id}", status_code=204)

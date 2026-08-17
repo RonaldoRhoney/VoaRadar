@@ -64,5 +64,10 @@ class RadarOut(BaseModel):
     condition_classification: str | None
     created_at: datetime
     updated_at: datetime
+    # Calculado a partir do histórico real de preço da rota (nunca estimado)
+    # — ver RadarProgressService. None quando ainda não há dado suficiente
+    # pra essa rota, não quando o progresso é ruim (0% sugeriria "sabemos e
+    # é ruim"; None é honesto sobre "ainda não sabemos").
+    progress: int | None = None
 
     model_config = {"from_attributes": True}
