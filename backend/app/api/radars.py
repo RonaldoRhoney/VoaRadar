@@ -15,6 +15,7 @@ FRIENDLY_NOT_FOUND = "Radar não encontrado."
 FRIENDLY_INVALID_AIRPORT = "Origem ou destino inválidos."
 FRIENDLY_INVALID_CONDITION = "Condição do Radar incompleta — confira o valor ou a classificação escolhida."
 FRIENDLY_SAME_AIRPORT = "Origem e destino não podem ser o mesmo aeroporto."
+FRIENDLY_RETURN_BEFORE_DEPARTURE = "A data de volta não pode ser anterior à data de ida."
 
 
 @router.post("", response_model=RadarOut, status_code=201)
@@ -80,6 +81,8 @@ def update_radar(
         raise HTTPException(status_code=422, detail=FRIENDLY_INVALID_CONDITION)
     if radar.origin_airport_id == radar.destination_airport_id:
         raise HTTPException(status_code=422, detail=FRIENDLY_SAME_AIRPORT)
+    if radar.departure_date and radar.return_date and radar.return_date < radar.departure_date:
+        raise HTTPException(status_code=422, detail=FRIENDLY_RETURN_BEFORE_DEPARTURE)
 
     # Limpa o campo da condição anterior ao trocar de tipo — evita lixo de
     # dado que não é mais usado por nenhuma leitura, mas ficaria salvo.

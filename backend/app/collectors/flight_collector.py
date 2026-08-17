@@ -79,7 +79,11 @@ class FlightCollector:
 
                 if self._radar_evaluator is not None:
                     self._radar_evaluator.evaluate_for_route(
-                        route_id=route.id, current_price=offer.price, price_snapshot_id=snapshot.id
+                        route_id=route.id,
+                        current_price=offer.price,
+                        price_snapshot_id=snapshot.id,
+                        departure_date=date.fromisoformat(offer.departure_date),
+                        return_date=date.fromisoformat(offer.return_date) if offer.return_date else None,
                     )
 
         return snapshots_recorded

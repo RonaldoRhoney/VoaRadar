@@ -16,6 +16,8 @@ export function RadarForm({
   const [name, setName] = useState(initialRadar?.name ?? "");
   const [originAirportId, setOriginAirportId] = useState(initialRadar?.originAirportId ?? "");
   const [destinationAirportId, setDestinationAirportId] = useState(initialRadar?.destinationAirportId ?? "");
+  const [departureDate, setDepartureDate] = useState(initialRadar?.departureDate ?? "");
+  const [returnDate, setReturnDate] = useState(initialRadar?.returnDate ?? "");
   const [conditionType, setConditionType] = useState<ConditionType>(initialRadar?.conditionType ?? "PRICE_BELOW");
   const [conditionPrice, setConditionPrice] = useState(initialRadar?.conditionPrice ?? 500);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -29,6 +31,8 @@ export function RadarForm({
         name,
         originAirportId,
         destinationAirportId,
+        departureDate: departureDate || null,
+        returnDate: returnDate || null,
         conditionType,
         conditionPrice: conditionType === "PRICE_BELOW" ? conditionPrice : null,
         conditionClassification: conditionType === "OPPORTUNITY_CLASSIFICATION" ? "EXCELLENT" : null,
@@ -91,6 +95,33 @@ export function RadarForm({
           </select>
         </label>
       </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm text-white/70">
+          Ida <span className="text-white/40">(opcional)</span>
+          <input
+            type="date"
+            min={new Date().toISOString().slice(0, 10)}
+            value={departureDate}
+            onChange={(e) => setDepartureDate(e.target.value)}
+            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500 [color-scheme:dark]"
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm text-white/70">
+          Volta <span className="text-white/40">(opcional)</span>
+          <input
+            type="date"
+            min={departureDate || undefined}
+            value={returnDate}
+            onChange={(e) => setReturnDate(e.target.value)}
+            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500 [color-scheme:dark]"
+          />
+        </label>
+      </div>
+      <p className="-mt-2 text-xs text-white/40">
+        Sem data, o Radar vigia a rota inteira, qualquer época. Com data, só avisa se encontrar oferta exatamente nesses dias.
+      </p>
 
       <label className="flex flex-col gap-2 text-sm text-white/70">
         Avisar quando

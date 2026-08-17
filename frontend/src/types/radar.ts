@@ -13,6 +13,8 @@ export interface Radar {
   name: string;
   originAirportId: string;
   destinationAirportId: string;
+  departureDate: string | null;
+  returnDate: string | null;
   status: RadarStatus;
   conditionType: ConditionType;
   conditionPrice: number | null;

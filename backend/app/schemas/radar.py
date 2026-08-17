@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, model_validator
@@ -12,6 +12,8 @@ class RadarCreate(BaseModel):
     name: str
     origin_airport_id: uuid.UUID
     destination_airport_id: uuid.UUID
+    departure_date: date | None = None
+    return_date: date | None = None
     condition_type: ConditionType
     condition_price: float | None = None
     condition_classification: str | None = None
@@ -30,11 +32,19 @@ class RadarCreate(BaseModel):
             raise ValueError("Origem e destino não podem ser o mesmo aeroporto")
         return self
 
+    @model_validator(mode="after")
+    def _return_not_before_departure(self) -> "RadarCreate":
+        if self.departure_date and self.return_date and self.return_date < self.departure_date:
+            raise ValueError("A data de volta não pode ser anterior à data de ida")
+        return self
+
 
 class RadarUpdate(BaseModel):
     name: str | None = None
     origin_airport_id: uuid.UUID | None = None
     destination_airport_id: uuid.UUID | None = None
+    departure_date: date | None = None
+    return_date: date | None = None
     status: RadarStatus | None = None
     condition_type: ConditionType | None = None
     condition_price: float | None = None
@@ -46,6 +56,8 @@ class RadarOut(BaseModel):
     name: str
     origin_airport_id: uuid.UUID
     destination_airport_id: uuid.UUID
+    departure_date: date | None
+    return_date: date | None
     status: RadarStatus
     condition_type: ConditionType
     condition_price: float | None

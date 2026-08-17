@@ -1,7 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from app.models.notification import OPPORTUNITY_FOUND
+from app.models.radar import Radar
 from app.radar_engine.cooldown import should_notify
 from app.radar_engine.engine import RadarCondition, evaluate_radar
 from app.repositories.notification_repository import NotificationRepository
@@ -26,9 +27,22 @@ class RadarEvaluationService:
         self._notification_repository = notification_repository
         self._price_intelligence_service = PriceIntelligenceService(price_history_repository)
 
-    def evaluate_for_route(self, *, route_id: uuid.UUID, current_price: float, price_snapshot_id: uuid.UUID) -> None:
+    def evaluate_for_route(
+        self,
+        *,
+        route_id: uuid.UUID,
+        current_price: float,
+        price_snapshot_id: uuid.UUID,
+        departure_date: date | None = None,
+        return_date: date | None = None,
+    ) -> None:
         """Chamado logo após um novo PriceSnapshot ser persistido
-        (RADAR_ENGINE.md §3) — orientado a evento, não por polling."""
+        (RADAR_ENGINE.md §3) — orientado a evento, não por polling.
+
+        `departure_date`/`return_date` são os da observação que gerou este
+        snapshot — usados só pra filtrar Radar com data marcada (2026-08-17:
+        "campo ida e volta"). Radar sem data (comportamento anterior)
+        continua vigiando a rota inteira, qualquer época."""
         route = self._price_history_repository.get_route(route_id)
         if route is None:
             return
@@ -36,6 +50,9 @@ class RadarEvaluationService:
         candidates = self._radar_repository.find_active_for_route(
             route.origin_airport_id, route.destination_airport_id
         )
+        candidates = [
+            radar for radar in candidates if _dates_match(radar, departure_date, return_date)
+        ]
         if not candidates:
             return
 
@@ -77,6 +94,17 @@ class RadarEvaluationService:
                     title="Nova oportunidade encontrada!",
                     message=_build_message(radar.name, current_price, intelligence.percentage_vs_mean),
                 )
+
+
+def _dates_match(radar: Radar, observation_departure: date | None, observation_return: date | None) -> bool:
+    """Comparação exata, deliberadamente simples pra essa primeira versão
+    do filtro (data única, não uma janela de flexibilidade) — evoluir pra
+    intervalo é trabalho futuro, não escopo deste pedido."""
+    if radar.departure_date is not None and radar.departure_date != observation_departure:
+        return False
+    if radar.return_date is not None and radar.return_date != observation_return:
+        return False
+    return True
 
 
 def _build_message(radar_name: str, price: float, percentage_vs_mean: float | None) -> str:

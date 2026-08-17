@@ -14,6 +14,18 @@ function conditionLabel(radar: Radar): string {
   return "Excelente oportunidade";
 }
 
+function formatDate(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("pt-BR");
+}
+
+function datesLabel(radar: Radar): string | null {
+  if (!radar.departureDate && !radar.returnDate) return null;
+  if (radar.departureDate && radar.returnDate) {
+    return `${formatDate(radar.departureDate)} → ${formatDate(radar.returnDate)}`;
+  }
+  return formatDate(radar.departureDate ?? radar.returnDate!);
+}
+
 export function RadarCard({
   radar,
   airports,
@@ -40,6 +52,7 @@ export function RadarCard({
             {airportLabel(airports, radar.originAirportId)} → {airportLabel(airports, radar.destinationAirportId)}
           </p>
           <p className="mt-1 text-sm text-white/60">{conditionLabel(radar)}</p>
+          {datesLabel(radar) && <p className="mt-1 text-xs text-white/40">📅 {datesLabel(radar)}</p>}
         </div>
         <span className={`shrink-0 text-xs font-medium ${isActive ? "text-radar-400" : "text-white/40"}`}>
           {isActive ? "🟢 ATIVO" : "⚪ PAUSADO"}

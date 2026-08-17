@@ -361,6 +361,8 @@ interface RadarWire {
   name: string;
   origin_airport_id: string;
   destination_airport_id: string;
+  departure_date: string | null;
+  return_date: string | null;
   status: "ACTIVE" | "PAUSED";
   condition_type: "PRICE_BELOW" | "OPPORTUNITY_CLASSIFICATION";
   condition_price: number | null;
@@ -375,6 +377,8 @@ function mapRadar(radar: RadarWire): Radar {
     name: radar.name,
     originAirportId: radar.origin_airport_id,
     destinationAirportId: radar.destination_airport_id,
+    departureDate: radar.departure_date,
+    returnDate: radar.return_date,
     status: radar.status,
     conditionType: radar.condition_type,
     conditionPrice: radar.condition_price,
@@ -388,6 +392,8 @@ export interface RadarInput {
   name: string;
   originAirportId: string;
   destinationAirportId: string;
+  departureDate?: string | null;
+  returnDate?: string | null;
   conditionType: "PRICE_BELOW" | "OPPORTUNITY_CLASSIFICATION";
   conditionPrice?: number | null;
   conditionClassification?: string | null;
@@ -398,6 +404,8 @@ function radarInputToWire(input: RadarInput) {
     name: input.name,
     origin_airport_id: input.originAirportId,
     destination_airport_id: input.destinationAirportId,
+    departure_date: input.departureDate ?? null,
+    return_date: input.returnDate ?? null,
     condition_type: input.conditionType,
     condition_price: input.conditionPrice ?? null,
     condition_classification: input.conditionClassification ?? null,
@@ -432,6 +440,8 @@ export async function updateRadar(
   if (patch.name !== undefined) body.name = patch.name;
   if (patch.originAirportId !== undefined) body.origin_airport_id = patch.originAirportId;
   if (patch.destinationAirportId !== undefined) body.destination_airport_id = patch.destinationAirportId;
+  if (patch.departureDate !== undefined) body.departure_date = patch.departureDate;
+  if (patch.returnDate !== undefined) body.return_date = patch.returnDate;
   if (patch.status !== undefined) body.status = patch.status;
   if (patch.conditionType !== undefined) body.condition_type = patch.conditionType;
   if (patch.conditionPrice !== undefined) body.condition_price = patch.conditionPrice;

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { resolveAirlineWebsite } from "../features/explore/airlineWebsite";
 import { DestinationCard } from "../features/explore/DestinationCard";
 import {
   applyFilters,
@@ -255,14 +256,34 @@ function OfferDetail({
           </div>
         </dl>
 
-        <button
-          type="button"
-          disabled
-          title="Redirecionamento para o fornecedor ainda não implementado nesta versão."
-          className="cursor-not-allowed rounded-lg bg-white/10 px-4 py-2.5 text-center text-sm font-medium text-white/50"
-        >
-          Ir para o fornecedor (em breve)
-        </button>
+        {(() => {
+          const airlineUrl = resolveAirlineWebsite(offer.airline);
+          if (!airlineUrl) {
+            return (
+              <button
+                type="button"
+                disabled
+                title="Não encontramos o site oficial dessa companhia."
+                className="cursor-not-allowed rounded-lg bg-white/10 px-4 py-2.5 text-center text-sm font-medium text-white/50"
+              >
+                Ir para a {offer.airline}
+              </button>
+            );
+          }
+          return (
+            <a
+              href={airlineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg bg-sky-500 px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-sky-600"
+            >
+              Ir para o site da {offer.airline} →
+            </a>
+          );
+        })()}
+        <p className="text-xs text-white/40">
+          Esse preço e essas datas são de exemplo (mock) — você será levado pro site oficial da companhia, onde precisa pesquisar por conta própria.
+        </p>
       </article>
 
       <div className="mt-4">

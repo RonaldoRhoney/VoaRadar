@@ -228,3 +228,91 @@ def test_radar_por_classificacao_de_oportunidade(db_session):
     db_session.commit()
 
     assert len(notification_repo.list_for_user(user_id)) == 1
+
+
+def test_radar_com_data_so_dispara_pra_observacao_na_mesma_data(db_session):
+    service, price_history_repo, radar_repo, notification_repo = _make_service(db_session)
+    route, snapshot = _seed_route_with_history(price_history_repo, [600, 620, 640])
+
+    user_id = uuid.uuid4()
+    radar_repo.create(
+        user_id=user_id,
+        name="Radar com data",
+        origin_airport_id=route.origin_airport_id,
+        destination_airport_id=route.destination_airport_id,
+        departure_date=date(2026, 10, 14),
+        return_date=date(2026, 10, 18),
+        condition_type="PRICE_BELOW",
+        condition_price=500,
+    )
+    db_session.commit()
+
+    # _seed_route_with_history grava tudo com ida 14/10 e volta 18/10 —
+    # bate com o Radar, deve disparar.
+    service.evaluate_for_route(
+        route_id=route.id,
+        current_price=429,
+        price_snapshot_id=snapshot.id,
+        departure_date=date(2026, 10, 14),
+        return_date=date(2026, 10, 18),
+    )
+    db_session.commit()
+
+    assert len(notification_repo.list_for_user(user_id)) == 1
+
+
+def test_radar_com_data_nao_dispara_pra_observacao_de_outra_data(db_session):
+    service, price_history_repo, radar_repo, notification_repo = _make_service(db_session)
+    route, snapshot = _seed_route_with_history(price_history_repo, [600, 620, 640])
+
+    user_id = uuid.uuid4()
+    radar_repo.create(
+        user_id=user_id,
+        name="Radar com data",
+        origin_airport_id=route.origin_airport_id,
+        destination_airport_id=route.destination_airport_id,
+        departure_date=date(2026, 11, 1),
+        return_date=date(2026, 11, 5),
+        condition_type="PRICE_BELOW",
+        condition_price=500,
+    )
+    db_session.commit()
+
+    # Observação real é 14/10, o Radar só quer 01/11 — não deve disparar.
+    service.evaluate_for_route(
+        route_id=route.id,
+        current_price=429,
+        price_snapshot_id=snapshot.id,
+        departure_date=date(2026, 10, 14),
+        return_date=date(2026, 10, 18),
+    )
+    db_session.commit()
+
+    assert notification_repo.list_for_user(user_id) == []
+
+
+def test_radar_sem_data_dispara_independente_da_data_da_observacao(db_session):
+    service, price_history_repo, radar_repo, notification_repo = _make_service(db_session)
+    route, snapshot = _seed_route_with_history(price_history_repo, [600, 620, 640])
+
+    user_id = uuid.uuid4()
+    radar_repo.create(
+        user_id=user_id,
+        name="Radar sem data (comportamento anterior)",
+        origin_airport_id=route.origin_airport_id,
+        destination_airport_id=route.destination_airport_id,
+        condition_type="PRICE_BELOW",
+        condition_price=500,
+    )
+    db_session.commit()
+
+    service.evaluate_for_route(
+        route_id=route.id,
+        current_price=429,
+        price_snapshot_id=snapshot.id,
+        departure_date=date(2026, 12, 25),
+        return_date=date(2026, 12, 31),
+    )
+    db_session.commit()
+
+    assert len(notification_repo.list_for_user(user_id)) == 1

@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Numeric, String, Uuid
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Numeric, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import TimestampedModel, utcnow
@@ -25,6 +25,10 @@ class Radar(TimestampedModel):
         CheckConstraint(f"condition_type IN ('{PRICE_BELOW}', '{OPPORTUNITY_CLASSIFICATION}')", name="ck_radar_condition_type"),
         CheckConstraint(f"status IN ('{ACTIVE}', '{PAUSED}')", name="ck_radar_status"),
         CheckConstraint("origin_airport_id != destination_airport_id", name="ck_radar_distinct_airports"),
+        CheckConstraint(
+            "return_date IS NULL OR departure_date IS NULL OR return_date >= departure_date",
+            name="ck_radar_return_not_before_departure",
+        ),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), index=True)
@@ -34,6 +38,11 @@ class Radar(TimestampedModel):
         Uuid(as_uuid=True), ForeignKey("airports.id"), index=True
     )
     status: Mapped[str] = mapped_column(String(16), default=ACTIVE)
+    # Opcionais — Radar sem data continua vigiando a rota inteira, qualquer
+    # época (comportamento anterior, preservado). Quando preenchidas, o
+    # motor de avaliação só considera observação dentro da janela.
+    departure_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    return_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     condition_type: Mapped[str] = mapped_column(String(32))
     condition_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     condition_classification: Mapped[str | None] = mapped_column(String(32), nullable=True)

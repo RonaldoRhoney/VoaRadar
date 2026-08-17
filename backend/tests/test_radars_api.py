@@ -219,3 +219,48 @@ class TestIDOR:
 
         assert response.status_code == 200
         assert response.json() == []
+
+
+class TestRadarDatas:
+    """Campo de ida e volta (2026-08-17) — opcional, Radar sem data
+    continua vigiando a rota inteira (comportamento anterior)."""
+
+    def test_criar_radar_sem_data_continua_funcionando(self, client, db_session, make_auth_headers):
+        origin, destination = _seed_airports(db_session)
+        _, headers = make_auth_headers()
+
+        response = client.post("/radars", json=_radar_payload(origin, destination), headers=headers)
+
+        assert response.status_code == 201
+        assert response.json()["departure_date"] is None
+        assert response.json()["return_date"] is None
+
+    def test_criar_radar_com_ida_e_volta(self, client, db_session, make_auth_headers):
+        origin, destination = _seed_airports(db_session)
+        _, headers = make_auth_headers()
+        payload = {**_radar_payload(origin, destination), "departure_date": "2026-10-14", "return_date": "2026-10-18"}
+
+        response = client.post("/radars", json=payload, headers=headers)
+
+        assert response.status_code == 201
+        assert response.json()["departure_date"] == "2026-10-14"
+        assert response.json()["return_date"] == "2026-10-18"
+
+    def test_criar_radar_com_volta_antes_da_ida_e_422(self, client, db_session, make_auth_headers):
+        origin, destination = _seed_airports(db_session)
+        _, headers = make_auth_headers()
+        payload = {**_radar_payload(origin, destination), "departure_date": "2026-10-18", "return_date": "2026-10-14"}
+
+        response = client.post("/radars", json=payload, headers=headers)
+
+        assert response.status_code == 422
+
+    def test_editar_radar_para_volta_antes_da_ida_e_422(self, client, db_session, make_auth_headers):
+        origin, destination = _seed_airports(db_session)
+        _, headers = make_auth_headers()
+        payload = {**_radar_payload(origin, destination), "departure_date": "2026-10-14", "return_date": "2026-10-18"}
+        radar_id = client.post("/radars", json=payload, headers=headers).json()["id"]
+
+        response = client.put(f"/radars/{radar_id}", json={"departure_date": "2026-11-01"}, headers=headers)
+
+        assert response.status_code == 422

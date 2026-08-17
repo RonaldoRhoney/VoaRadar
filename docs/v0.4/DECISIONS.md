@@ -230,3 +230,26 @@ Pedido do usuário: "em criar radar, disponibilize todas origens e destinos". `a
 **Ressalva registrada, não escondida**: `MockFlightProvider.get_destinations` continua ignorando `origin_city` e devolvendo sempre os mesmos 4 destinos fixos (REC/FOR/BSB/SSA) — criar um Radar entre duas das 22 capitais novas funciona (o formulário aceita, salva no banco), mas a avaliação de preço (`RadarEvaluationService`) só vai encontrar alguma coisa pra rotas que o mock realmente gera. Isso é uma limitação já conhecida do mock, não nova — só ficou mais visível agora que o seletor não esconde mais as opções.
 
 Aplicado ao vivo em produção (`alembic upgrade head` contra o Supabase real): `GET /airports` confirmado devolvendo 27 aeroportos. 103/103 testes de backend continuam passando (usam SQLite isolado, não afetados pela migration em produção).
+
+## DEC-125 — Ida e volta no Radar + redirecionamento pro site da companhia (2026-08-17)
+
+Pedido do usuário: "em criar radar, crie o campo ida e volta, hoje só tem ida, ao encontrar a melhor oferta o usuário deve clicar e ser redirecionado para a devida companhia aérea." Duas features distintas, tratadas juntas por virem do mesmo pedido.
+
+**Risco sinalizado antes de codificar**: a segunda parte ("redirecionado para a devida companhia aérea"), se implementada como link direto pra uma oferta/preço específico, apresentaria um voo/preço **mock** como se fosse uma oferta real reservável — violação direta do princípio do `CLAUDE.md` §9/§16 ("nunca afirmar que o sistema pesquisa... sem comprovação", "mock data... não deve mascarar uma integração inexistente"). Perguntado ao usuário como tratar; resposta: **"Só pro site oficial da companhia, deixando claro que é mock."**
+
+**Parte 1 — Ida e volta**:
+- `Radar` ganhou `departure_date`/`return_date` (nullable, `Date`), `CheckConstraint` garantindo `return_date >= departure_date` quando ambos presentes. Migration `0014`, aplicada ao vivo em produção (`alembic upgrade head`).
+- `RadarCreate`/`RadarUpdate`/`RadarOut` (schemas) e validação: `RadarCreate` valida no próprio schema (não depende de merge parcial); `update_radar` (endpoint) valida no **estado final mesclado**, mesmo padrão já estabelecido em DEC-114/115 pra invariantes com `PATCH` parcial.
+- `RadarEvaluationService.evaluate_for_route` passou a receber `departure_date`/`return_date` da oferta observada e filtrar candidatos por `_dates_match` — comparação exata (não janela de flexibilidade), decisão deliberada de escopo mínimo pra esta etapa. Radar sem data continua vigiando a rota inteira, qualquer época (retrocompatível).
+- `FlightCollector` passa as datas da oferta pro avaliador.
+
+**Parte 2 — Redirecionamento pra companhia**:
+- `airlineWebsite.ts` (novo): mapa fixo de domínio oficial por companhia (Gol/Azul/Latam), URLs verificadas ao vivo via busca em 2026-08-17, não de memória. Nunca uma URL profunda de voo/preço específico — só a home institucional.
+- `Results.tsx`: botão "Ir para o site da {companhia}" (`target="_blank"`) quando a companhia é conhecida; fallback desabilitado quando não. Disclaimer explícito abaixo: preço/data mostrados são mock, a pessoa pesquisa por conta própria no site oficial.
+
+**Testado**:
+- 7 testes novos de backend (4 em `test_radars_api.py` cobrindo criação/edição com data, validação de volta-antes-da-ida; 3 em `test_radar_evaluation_service.py` cobrindo match exato de data, não-match, e radar sem data disparando independente da data). 110/110 testes de backend passando, Bandit limpo.
+- Build, 16/16 testes de frontend e lint (`oxlint`) continuam limpos.
+- **Ao vivo em produção**: criado radar de teste real com `departure_date`/`return_date`, confirmado persistido e devolvido corretamente pela API (`POST /radars`); confirmado `422` ao tentar volta antes da ida. Usuário de teste removido do banco depois.
+
+Deploy de produção atualizado (backend e frontend, `vercel --prod`).
