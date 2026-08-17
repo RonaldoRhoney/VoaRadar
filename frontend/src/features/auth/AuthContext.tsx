@@ -18,7 +18,11 @@ function initialSession(): Session | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(initialSession);
   const [role, setRole] = useState<string | null>(null);
-  const [roleLoading, setRoleLoading] = useState(false);
+  // Começa "true" quando já existe sessão salva (ex: navegar direto pra
+  // /admin depois de já ter feito login antes) — sem isso, o primeiro
+  // render do AdminRoute via role=null/roleLoading=false como "confirmado
+  // não-admin" e redireciona antes do useEffect abaixo sequer rodar.
+  const [roleLoading, setRoleLoading] = useState(() => initialSession() !== null);
 
   useEffect(() => {
     if (!session) {

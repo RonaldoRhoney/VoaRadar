@@ -177,3 +177,5 @@ Pedido do usuário: "pode seguir o fluxo" — próximo item pendente da extensã
 - Build, 16/16 testes de frontend e lint continuam limpos. `/admin` retorna 200 em produção.
 
 Fecha a extensão Admin padrão (FASE A + B + C completas).
+
+**Bug real encontrado pelo usuário logo depois ("não funcionou", não conseguia acessar `/admin`)**: condição de corrida no `AdminRoute`. `roleLoading` iniciava sempre `false` — no primeiro render de uma navegação direta pra `/admin` com uma sessão já salva (o caso normal, não um login novo), o `AdminRoute` via `session` presente + `roleLoading=false` + `role=null` (ainda não buscado) e interpretava isso como "confirmado não-admin", redirecionando pra `/` **antes** do `useEffect` que busca o `role` sequer rodar. Corrigido inicializando `roleLoading` como `true` sempre que já existe sessão salva no primeiro render (`useState(() => initialSession() !== null)`), fechando a janela de corrida. Build, 16/16 testes e lint continuam limpos, `/admin` re-testado em produção.
