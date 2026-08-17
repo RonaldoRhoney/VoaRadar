@@ -58,7 +58,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 **STATUS: FECHADA** (tag `v0.4.0`, 2026-08-14) — documentação completa em [docs/v0.4/](docs/v0.4/). FASE 0-10 concluídas: modelo Radar, regras de disparo, monitoramento, RLS/segurança, backend (auth real via Supabase, radar engine, evaluation service), frontend (login, Meus Radares, central de notificações), 92/92 pytest, Bandit limpo, 16/16 Vitest, 7/7 E2E, checklist formal das 5 falhas de vibe coding. *(Item corrigido nesta revisão — este arquivo listava "Alertas (v0.4)" como pendente por desatualização, quando já estava lançada.)*
 
-**Extensão pós-release, em andamento**: Admin padrão (`rhoneyinc@gmail.com`) — **FASE A** (`profiles.role` + trigger + `GET /auth/me`, DEC-116) e **FASE C** (login social Google, DEC-120, 2026-08-17) concluídas. FASE B (painel admin) ainda não definida em detalhe.
+**Extensão pós-release**: Admin padrão (`rhoneyinc@gmail.com`) — **STATUS: CONCLUÍDA** (FASE A DEC-116, FASE B DEC-121, FASE C DEC-120, todas em 2026-08-16/17). `GET /admin/metrics` (só agregados) + painel `/admin` no frontend, login social Google, role decidido só a partir de `profiles`.
 
 ## Próximo
 
@@ -66,7 +66,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117/DEC-118) — `AnacFareProvider`/`FareReferenceProvider` implementado e em produção (`anac_reference` no Price Intelligence, opcional, nunca quebra a resposta). Pendente: `scripts/import_anac_fares.py` — schema real do CSV da ANAC ainda não verificado (ferramenta de consulta interativa, não link estático; acesso ao domínio falhou do sandbox). Sem esse script, a tabela `anac_fare_reference` fica vazia e `anac_reference` sempre `null` em produção.
 - [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
 - [x] Admin — FASE C (login social Google). **Concluído 2026-08-17** (DEC-120).
-- [ ] Admin — FASE B (painel), ainda sem plano detalhado.
+- [x] Admin — FASE B (painel de métricas). **Concluído 2026-08-17** (DEC-121).
 - [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.
 - [ ] Inteligência artificial / recomendações (v0.5).
 

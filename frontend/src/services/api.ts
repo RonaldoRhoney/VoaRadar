@@ -271,6 +271,43 @@ async function authFetch(path: string, accessToken: string, init?: RequestInit):
 
 export { AuthRequiredError };
 
+export interface Me {
+  id: string;
+  email: string | null;
+  role: string;
+}
+
+export async function getMe(accessToken: string): Promise<Me> {
+  const response = await authFetch("/auth/me", accessToken);
+  if (!response.ok) throw new ApiError("Não conseguimos confirmar sua sessão.");
+  return response.json();
+}
+
+export interface PlatformMetrics {
+  totalUsers: number;
+  totalRadars: number;
+  activeRadars: number;
+  totalRadarEvents: number;
+  totalNotifications: number;
+  newUsers7d: number;
+  newRadars7d: number;
+}
+
+export async function getPlatformMetrics(accessToken: string): Promise<PlatformMetrics> {
+  const response = await authFetch("/admin/metrics", accessToken);
+  if (!response.ok) throw new ApiError("Não conseguimos carregar as métricas.");
+  const body = await response.json();
+  return {
+    totalUsers: body.total_users,
+    totalRadars: body.total_radars,
+    activeRadars: body.active_radars,
+    totalRadarEvents: body.total_radar_events,
+    totalNotifications: body.total_notifications,
+    newUsers7d: body.new_users_7d,
+    newRadars7d: body.new_radars_7d,
+  };
+}
+
 // --- Airports (v0.4 — só pro seletor de origem/destino do Radar) ----------
 
 interface AirportWire {

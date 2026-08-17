@@ -3,6 +3,8 @@ import type { Session } from "../../types/auth";
 
 export interface AuthState {
   session: Session | null;
+  role: string | null;
+  roleLoading: boolean;
   signup: (email: string, password: string) => Promise<{ confirmationRequired: boolean }>;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => void;

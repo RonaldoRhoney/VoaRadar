@@ -18,7 +18,7 @@ function NotificationBell() {
 }
 
 export function Header() {
-  const { session, logout } = useAuth();
+  const { session, role, logout } = useAuth();
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -43,6 +43,11 @@ export function Header() {
               <Link to="/radares" className="hidden hover:text-white sm:inline">
                 Meus Radares
               </Link>
+              {role === "admin" && (
+                <Link to="/admin" className="hidden hover:text-white sm:inline">
+                  Painel Admin
+                </Link>
+              )}
               <NotificationBell />
               <button onClick={handleLogout} className="hover:text-white">
                 Sair

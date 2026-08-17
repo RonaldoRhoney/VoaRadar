@@ -162,3 +162,18 @@ Pedido do usuário: "vamos habilitar login com google" — completa a FASE C men
 Deploy de produção do frontend atualizado (`voaradar.rhoneyinc.com`), com `VITE_SUPABASE_URL` configurada.
 
 **Bug real encontrado pelo usuário após o login de verdade**: `/auth/callback` devolvia 404 puro da Vercel (`NOT_FOUND`) em vez de carregar o app. Causa: o frontend nunca tinha `vercel.json` — a Vercel serve arquivo estático por padrão, e uma navegação de página inteira (o redirect do Google/Supabase, não navegação client-side do React Router) pra uma rota que só existe no React Router não encontra arquivo físico correspondente. Corrigido com `frontend/vercel.json` (`rewrites` redirecionando qualquer path pro `index.html`, deixando o React Router assumir depois que a SPA carrega) — o fragmento `#access_token=...` da URL é preservado pelo navegador independente do rewrite do servidor, então o `AuthCallback` continua lendo o token corretamente. Re-testado: `/auth/callback`, `/radares` e `/` retornam 200. Vale registrar no checklist "novo app no ar": toda SPA da RhoneyInc no Vercel precisa desse rewrite desde o primeiro deploy, não só quando uma rota client-side quebra.
+
+## DEC-121 — Admin FASE B: painel de métricas (2026-08-17)
+
+Pedido do usuário: "pode seguir o fluxo" — próximo item pendente da extensão Admin (FASE A e FASE C já concluídas), sem plano detalhado registrado ainda, então montei um a partir do modelo de dado existente (`profiles`, `radars`, `radar_events`, `notifications`) antes de codificar.
+
+**Backend**: `app/api/admin.py`, endpoint `GET /admin/metrics`, protegido por `require_admin` (decide o `role` só a partir de `profiles`, nunca de claim do token — mesmo princípio de `/auth/me`). Métricas **só agregadas** (`PlatformMetrics`): usuários totais, radares totais/ativos, oportunidades detectadas (`radar_events`), notificações enviadas, novos usuários/radares nos últimos 7 dias — nunca expõe qual rota ou preço um usuário específico está monitorando (mesmo cuidado de minimização já aplicado no painel admin do FinTra, DEC-002).
+
+**Frontend**: `/admin` (nova rota, `AdminPanel.tsx`), protegida por `AdminRoute` — que espera o `role` carregar (`roleLoading`) antes de decidir redirecionar, pra não expulsar um admin de verdade só porque a checagem assíncrona ainda não voltou. Link "Painel Admin" no header, visível só quando `role === "admin"`. `AuthContext` ganhou `role`/`roleLoading`, buscado via `/auth/me` sempre que a sessão muda (login, cadastro, callback do Google).
+
+**Testado**:
+- 3 testes novos de backend (`tests/test_admin_api.py`): sem token → 401, usuário comum → 403, admin → 200 com contagens corretas. 97/97 testes de backend passando, Bandit limpo.
+- **Ao vivo em produção**: criado usuário de teste real (e removido depois), confirmado 403 como usuário comum, promovido a admin direto no banco, confirmado 200 com `total_users`/`new_users_7d` corretos batendo com o estado real do banco.
+- Build, 16/16 testes de frontend e lint continuam limpos. `/admin` retorna 200 em produção.
+
+Fecha a extensão Admin padrão (FASE A + B + C completas).

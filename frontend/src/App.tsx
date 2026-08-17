@@ -1,6 +1,8 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
+import { useAuth } from "./features/auth/useAuth";
+import { AdminPanel } from "./pages/AdminPanel";
 import { AuthCallback } from "./pages/AuthCallback";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
@@ -10,6 +12,14 @@ import { RadarFormPage } from "./pages/RadarFormPage";
 import { Radars } from "./pages/Radars";
 import { Results } from "./pages/Results";
 import { Signup } from "./pages/Signup";
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { session, role, roleLoading } = useAuth();
+  if (!session) return <Navigate to="/entrar" replace />;
+  if (roleLoading) return null;
+  if (role !== "admin") return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
 
 function App() {
   return (
@@ -50,6 +60,14 @@ function App() {
             <ProtectedRoute>
               <Notifications />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
           }
         />
         <Route path="*" element={<NotFound />} />
