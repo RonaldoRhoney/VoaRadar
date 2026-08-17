@@ -253,3 +253,20 @@ Pedido do usuário: "em criar radar, crie o campo ida e volta, hoje só tem ida,
 - **Ao vivo em produção**: criado radar de teste real com `departure_date`/`return_date`, confirmado persistido e devolvido corretamente pela API (`POST /radars`); confirmado `422` ao tentar volta antes da ida. Usuário de teste removido do banco depois.
 
 Deploy de produção atualizado (backend e frontend, `vercel --prod`).
+
+## DEC-126 — Correção de lentidão: função do backend na região errada + bundle sem code-splitting (2026-08-17)
+
+Pedido do usuário: "percebi que o App todo está lento, demora carregar, investigue e aplique correções."
+
+**Investigação (nunca supor, medir)**:
+- `curl -w "%{time_total}"` contra `GET /airports` (endpoint simples, sem lógica pesada) mostrou TTFB consistente de 640-810ms, inclusive em requisições repetidas (não era só cold start).
+- `x-vercel-id` da resposta revelou a causa: `gru1::iad1` — a requisição entra pelo edge de São Paulo (`gru1`), mas a função serverless do backend executava em `iad1` (Virgínia, EUA), a região padrão da Vercel quando nenhuma é configurada. O Supabase do VoaRadar está em `sa-east-1` (São Paulo, confirmado pela connection string do pooler já usada em decisões anteriores). Toda consulta ao banco cruzava o Atlântico duas vezes.
+- No frontend, `dist/assets/` tinha um único `index-*.js` de 290KB (86KB gzip) — todas as 10 páginas (incluindo o Painel Admin, que a maioria dos usuários nunca abre) no bundle inicial, sem `React.lazy`.
+
+**Correção 1 — backend**: `backend/vercel.json` ganhou `"regions": ["gru1"]`, colocando a função na mesma região do banco. Redeploy e nova medição: TTFB caiu pra ~170-330ms depois de aquecido — de 3 a 4x mais rápido, mesmo endpoint, mesma carga.
+
+**Correção 2 — frontend**: `App.tsx` — só `Home` e `Results` (as duas telas de entrada do produto) continuam no bundle inicial; `Login`, `Signup`, `AuthCallback`, `Radars`, `RadarFormPage`, `Notifications`, `AdminPanel` e `NotFound` viraram `React.lazy` com `Suspense`. Bundle principal caiu de 290KB para 270KB, com o restante dividido em chunks pequenos (0.2KB a 6KB) baixados só quando a rota é visitada.
+
+**Testado**: build limpo, 16/16 testes de frontend, lint (`oxlint`) limpo. Ao vivo em produção: `voaradar.rhoneyinc.com` e `/radares` carregando normalmente após o deploy, `x-vercel-id` confirmado como `gru1::gru1` (edge e função na mesma região agora).
+
+**Não escopo desta correção, registrado como melhoria futura**: o chunk principal ainda carrega bibliotecas usadas só no `Results` (gráfico de calendário de preço, etc.) — dividir por sub-feature dentro da própria página é um ganho menor e mais trabalhoso, não pareceu justificar o escopo desta correção pontual de performance.
