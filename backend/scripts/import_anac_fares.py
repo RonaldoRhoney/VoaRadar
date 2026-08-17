@@ -130,13 +130,43 @@ def _download_month_zip(client: httpx.Client, year: int, month: int) -> bytes:
     return download.content
 
 
+# A ANAC trocou o cabeçalho do CSV entre jan/2025 (ANO;MES;EMPRESA;ORIGEM;
+# DESTINO;TARIFA;ASSENTOS) e os meses seguintes (nr_ano_referencia;
+# nr_mes_referencia;sg_empresa_icao;sg_icao_origem;sg_icao_destino;
+# nr_tarifa;nr_assentos) — achado real, verificado baixando os dois
+# formatos, não documentado em lugar nenhum da ANAC. O script aceita os
+# dois (e falha alto, não silenciosamente, se aparecer um terceiro).
+_COLUMN_ALIASES: dict[str, set[str]] = {
+    "ORIGEM": {"origem", "sg_icao_origem"},
+    "DESTINO": {"destino", "sg_icao_destino"},
+    "TARIFA": {"tarifa", "nr_tarifa"},
+    "ASSENTOS": {"assentos", "nr_assentos"},
+}
+
+
+def _normalize_fieldnames(fieldnames: list[str]) -> dict[str, str]:
+    """Mapa {nome-real-da-coluna: nome-canônico} pra este arquivo específico."""
+    mapping = {}
+    for field in fieldnames:
+        normalized = field.strip().lower()
+        for canonical, aliases in _COLUMN_ALIASES.items():
+            if normalized in aliases:
+                mapping[field] = canonical
+                break
+    missing = set(_COLUMN_ALIASES) - set(mapping.values())
+    if missing:
+        raise ValueError(f"CSV da ANAC com colunas não reconhecidas — faltando {missing} em {fieldnames}")
+    return mapping
+
+
 def _parse_csv(zip_bytes: bytes) -> list[dict]:
     with zipfile.ZipFile(io.BytesIO(zip_bytes)) as archive:
         csv_name = next(name for name in archive.namelist() if name.upper().endswith(".CSV"))
         raw_text = archive.read(csv_name).decode("latin-1")
 
     reader = csv.DictReader(io.StringIO(raw_text), delimiter=";")
-    return list(reader)
+    column_map = _normalize_fieldnames(reader.fieldnames or [])
+    return [{column_map[k]: v for k, v in row.items() if k in column_map} for row in reader]
 
 
 def _aggregate_by_route(rows: list[dict]) -> dict[tuple[str, str], dict]:
