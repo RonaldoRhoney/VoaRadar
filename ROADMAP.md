@@ -67,7 +67,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 - [x] Calendário de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`). **Concluído 2026-08-17** (DEC-122): calendário de preço por dia na tela de detalhe da oferta, `GET /flights/calendar`, ainda mock (determinístico, não tarifa real).
 - [x] Admin — FASE C (login social Google). **Concluído 2026-08-17** (DEC-120).
 - [x] Admin — FASE B (painel de métricas). **Concluído 2026-08-17** (DEC-121).
-- [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.
+- [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio. Investigação real registrada em `docs/OFFER_PROVIDER_INVESTIGATION.md` (2026-08-17): Duffel free tier só dá preço fictício (companhia fake "Duffel Airways"), cota de busca grátis é proporcional a reserva confirmada (zero reserva = zero busca grátis); Kiwi Tequila fechou cadastro self-service, exige 50k MAU. Nenhum caminho zero-custo real encontrado, mesma conclusão estrutural do Open Finance.
 - [ ] Inteligência artificial / recomendações (v0.5).
 
 ## Sugestões futuras registradas (não implementadas)
