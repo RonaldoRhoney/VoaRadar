@@ -14,6 +14,9 @@ class _FakeProvider(FlightProvider):
     def get_destinations(self, origin_city, month):
         return self._destinations
 
+    def get_price_calendar(self, destination_id, month):
+        return []
+
 
 def test_only_offers_within_budget_are_kept():
     destinations = [

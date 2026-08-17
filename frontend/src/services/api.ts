@@ -1,4 +1,4 @@
-import type { ExploreParams, ExploreResult, Offer, Destination } from "../types/flight";
+import type { ExploreParams, ExploreResult, Offer, Destination, PriceCalendar } from "../types/flight";
 import type { PriceHistoryPoint, PriceIntelligence } from "../types/priceIntelligence";
 import type { Session } from "../types/auth";
 import type { Airport, Radar } from "../types/radar";
@@ -191,6 +191,36 @@ export async function fetchPriceIntelligence(
   }
 
   return mapPriceIntelligence(await response.json());
+}
+
+interface PriceCalendarWire {
+  destination_id: string;
+  month: string;
+  days: { date: string; price: number }[];
+  cheapest_date: string | null;
+}
+
+export async function fetchPriceCalendar(destinationId: string, month: string): Promise<PriceCalendar> {
+  let response: Response;
+  try {
+    response = await fetch(
+      `${API_BASE_URL}/flights/calendar?destination_id=${encodeURIComponent(destinationId)}&month=${encodeURIComponent(month)}`,
+    );
+  } catch {
+    throw new ApiError("Não conseguimos falar com o servidor agora. Verifique sua conexão e tente novamente.");
+  }
+
+  if (!response.ok) {
+    throw new ApiError("Não conseguimos carregar o calendário de preços agora. Tente novamente em instantes.");
+  }
+
+  const body: PriceCalendarWire = await response.json();
+  return {
+    destinationId: body.destination_id,
+    month: body.month,
+    days: body.days,
+    cheapestDate: body.cheapest_date,
+  };
 }
 
 // --- Auth (v0.4) ---------------------------------------------------------

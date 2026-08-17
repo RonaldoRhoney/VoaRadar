@@ -1,5 +1,19 @@
+import hashlib
+from calendar import monthrange
+from datetime import date
+
 from app.providers.base import FlightProvider
-from app.schemas.flight import Offer, RawDestination
+from app.schemas.flight import CalendarDay, Offer, RawDestination
+
+# Preço-base por destino, usado só pra gerar o calendário de preço por dia
+# (get_price_calendar) — os mesmos 4 destinos do _MOCK_DESTINATIONS acima,
+# derivado do preço da oferta mais barata de cada um.
+_CALENDAR_BASE_PRICE = {"REC": 429, "FOR": 517, "BSB": 598, "SSA": 689}
+_DEFAULT_BASE_PRICE = 550
+
+# Segunda=0 ... Domingo=6. Padrão real de tarifa aérea: meio de semana mais
+# barato, sexta/fim de semana mais caro — não é aleatório sem sentido.
+_WEEKDAY_FACTOR = {0: 0.92, 1: 0.85, 2: 0.85, 3: 0.95, 4: 1.15, 5: 1.22, 6: 1.05}
 
 # MOCK DATA — sem integração com fonte real de dados de voo ainda.
 # Preços, datas, companhias e escalas são fictícios, mas plausíveis.
@@ -54,3 +68,25 @@ class MockFlightProvider(FlightProvider):
 
     def get_destinations(self, origin_city: str, month: str) -> list[RawDestination]:
         return _MOCK_DESTINATIONS
+
+    def get_price_calendar(self, destination_id: str, month: str) -> list[CalendarDay]:
+        """Determinístico: a mesma combinação destino+mês sempre gera os
+        mesmos preços (nada de `random` sem seed) — necessário pra um mock
+        ser previsível em teste e estável entre chamadas do usuário."""
+        base_price = _CALENDAR_BASE_PRICE.get(destination_id, _DEFAULT_BASE_PRICE)
+        year, mon = (int(part) for part in month.split("-"))
+        days_in_month = monthrange(year, mon)[1]
+
+        calendar_days = []
+        for day in range(1, days_in_month + 1):
+            current_date = date(year, mon, day)
+            weekday_factor = _WEEKDAY_FACTOR[current_date.weekday()]
+
+            seed = f"{destination_id}-{current_date.isoformat()}"
+            digest = hashlib.sha256(seed.encode()).hexdigest()
+            noise = (int(digest, 16) % 101) / 100  # 0.0–1.0, estável por data
+
+            price = base_price * weekday_factor * (0.85 + noise * 0.3)
+            calendar_days.append(CalendarDay(date=current_date.isoformat(), price=round(price, 2)))
+
+        return calendar_days

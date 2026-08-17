@@ -64,7 +64,7 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 - [x] Deploy (Vercel) — frontend e backend. **Concluído 2026-08-16** (DEC-118): `voaradar-api` (backend) e `voaradar-frontend` (frontend), ambos em produção, CORS liberado pro domínio real, `ssoProtection` desativado em ambos os projetos. Só URLs `*.vercel.app` padrão por enquanto — domínio próprio `voaradar.rhoneyinc.com` e entrada no hub/rodapés seguem pendentes.
 - [x] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117/DEC-118) — `AnacFareProvider`/`FareReferenceProvider` implementado e em produção (`anac_reference` no Price Intelligence, opcional, nunca quebra a resposta). Pendente: `scripts/import_anac_fares.py` — schema real do CSV da ANAC ainda não verificado (ferramenta de consulta interativa, não link estático; acesso ao domínio falhou do sandbox). Sem esse script, a tabela `anac_fare_reference` fica vazia e `anac_reference` sempre `null` em produção.
-- [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
+- [x] Calendário de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`). **Concluído 2026-08-17** (DEC-122): calendário de preço por dia na tela de detalhe da oferta, `GET /flights/calendar`, ainda mock (determinístico, não tarifa real).
 - [x] Admin — FASE C (login social Google). **Concluído 2026-08-17** (DEC-120).
 - [x] Admin — FASE B (painel de métricas). **Concluído 2026-08-17** (DEC-121).
 - [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.

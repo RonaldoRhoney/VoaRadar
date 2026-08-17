@@ -67,3 +67,21 @@ class ExploreResponse(BaseModel):
     destinations: list[Destination]
     near_budget: list[Destination]
     metadata: Metadata
+
+
+class CalendarDay(BaseModel):
+    date: str
+    price: float
+
+
+class PriceCalendarResponse(BaseModel):
+    """Grade de preço por dia pra um destino, dentro de um mês — a peça que
+    faltava do DEC-008 (docs/v0.2/DECISIONS.md): em vez de só "mês inteiro",
+    o usuário vê os dias mais baratos de verdade. MOCK DATA — preço gerado
+    de forma determinística (mesma entrada sempre gera o mesmo preço), nunca
+    tarifa real."""
+
+    destination_id: str
+    month: str
+    days: list[CalendarDay]
+    cheapest_date: str | None = None

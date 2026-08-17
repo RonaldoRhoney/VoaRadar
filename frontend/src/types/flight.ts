@@ -38,3 +38,15 @@ export interface ExploreResult {
     cheapestPrice: number | null;
   };
 }
+
+export interface CalendarDay {
+  date: string;
+  price: number;
+}
+
+export interface PriceCalendar {
+  destinationId: string;
+  month: string;
+  days: CalendarDay[];
+  cheapestDate: string | null;
+}

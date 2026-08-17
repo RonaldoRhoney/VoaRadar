@@ -9,6 +9,7 @@ import {
   type SortOption,
 } from "../features/explore/exploreFilters";
 import { useExploreSearch } from "../features/explore/useExploreSearch";
+import { PriceCalendarView } from "../features/price-calendar/PriceCalendarView";
 import { PriceIntelligenceView } from "../features/price-intelligence/PriceIntelligenceView";
 import type { Destination, ExploreParams, Offer } from "../types/flight";
 import { formatCurrencyBRL, formatDateRange, formatDuration, formatStops } from "../utils/format";
@@ -266,6 +267,10 @@ function OfferDetail({
 
       <div className="mt-4">
         <PriceIntelligenceView offerId={offer.id} currentPrice={offer.price} />
+      </div>
+
+      <div className="mt-4">
+        <PriceCalendarView destinationId={destination.id} month={offer.departureDate.slice(0, 7)} />
       </div>
     </section>
   );

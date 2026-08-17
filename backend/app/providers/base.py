@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.schemas.flight import RawDestination
+from app.schemas.flight import CalendarDay, RawDestination
 
 
 class FlightProvider(ABC):
@@ -13,4 +13,10 @@ class FlightProvider(ABC):
 
     @abstractmethod
     def get_destinations(self, origin_city: str, month: str) -> list[RawDestination]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_price_calendar(self, destination_id: str, month: str) -> list[CalendarDay]:
+        """Preço por dia do mês (formato "YYYY-MM") pra um destino — base do
+        calendário de flexibilidade de datas (DEC-008)."""
         raise NotImplementedError

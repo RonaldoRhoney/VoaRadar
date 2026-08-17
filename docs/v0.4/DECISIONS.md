@@ -183,3 +183,18 @@ Fecha a extensão Admin padrão (FASE A + B + C completas).
 **Segundo bug real, mais sério, encontrado pelo usuário logando de verdade como `rhoneyinc@gmail.com`**: mesmo com o `role='admin'` correto no banco (confirmado via SQL direto), o painel não aparecia. Causa raiz: **`CORS_ORIGINS` do backend não incluía `https://voaradar.rhoneyinc.com`** — só tinha as URLs antigas `*.vercel.app` de quando o domínio próprio ainda não existia (DEC-118). Confirmado com `OPTIONS` real: `Disallowed CORS origin`. Isso quebrava silenciosamente a chamada `GET /auth/me` no navegador (bloqueada pelo CORS antes mesmo de chegar no backend) — o frontend nunca via o erro de verdade, só via `role` ficar `null` pra sempre e o `AdminRoute` redirecionava. Corrigido atualizando `CORS_ORIGINS` pra incluir o domínio real, redeploy do backend, re-verificado com `OPTIONS` real (`access-control-allow-origin: https://voaradar.rhoneyinc.com` presente agora).
 
 **Lição pro checklist "novo app no ar"**: sempre que um domínio próprio for adicionado a um produto já em produção, checar `CORS_ORIGINS` do backend correspondente — não basta configurar no momento do primeiro deploy, precisa ser revisitado toda vez que a lista de domínios do frontend mudar.
+
+## DEC-122 — Calendário de flexibilidade de datas (2026-08-17)
+
+Pedido do usuário: "vamos seguir" — resolve a pendência DEC-008 (`docs/v0.2/DECISIONS.md`), que adiava "análise de calendário completo (ex.: qualquer dia entre 1 e 30 de outubro, o Voa Radar encontrando os melhores dias)" pra uma versão futura. Plano apresentado e aprovado antes de codificar (`CLAUDE.md` §2).
+
+**Escopo decidido, deliberadamente aditivo**: em vez de reescrever o fluxo de busca existente (`ExploreRequest`/`month` livre, ex: "Outubro"), a feature entra como uma capacidade nova e isolada — calendário de preço por dia pra um destino já escolhido, na tela de detalhe da oferta. O Explore continua funcionando exatamente igual.
+
+**Backend**:
+- `FlightProvider` ganha o método abstrato `get_price_calendar(destination_id, month)` — `MockFlightProvider` implementa com preço determinístico (mesma entrada sempre gera o mesmo preço, via hash SHA-256 da combinação destino+data, nunca `random` sem seed) e um padrão realista de tarifa aérea (meio de semana mais barato, sexta/fim de semana mais caro), nunca dado real.
+- `GET /flights/calendar?destination_id=X&month=AAAA-MM` (novo endpoint, `PriceCalendarService`), valida formato do mês, devolve preço de cada dia + o dia mais barato do mês.
+- 6 testes novos (contagem de dias corretas incluindo fevereiro não-bissexto, determinismo, dia mais barato, formato inválido, destino desconhecido não quebra). 103/103 testes de backend passando, Bandit limpo.
+
+**Frontend**: `PriceCalendarView` (grade 7 colunas, cor por preço relativo ao próprio mês — verde mais barato, vermelho mais caro —, dia mais barato destacado com anel), na tela de detalhe da oferta, abaixo do `PriceIntelligenceView`. Mês derivado da própria data de ida da oferta.
+
+**Testado ao vivo em produção**: `GET /flights/calendar` retorna 31 dias corretos pra outubro/2026 com preços plausíveis; CORS confirmado liberado pro domínio real. Build, 16/16 testes de frontend e lint limpos.
