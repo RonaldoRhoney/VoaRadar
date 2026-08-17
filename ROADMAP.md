@@ -60,6 +60,10 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 **Extensão pós-release**: Admin padrão (`rhoneyinc@gmail.com`) — **STATUS: CONCLUÍDA** (FASE A DEC-116, FASE B DEC-121, FASE C DEC-120, todas em 2026-08-16/17). `GET /admin/metrics` (só agregados) + painel `/admin` no frontend, login social Google, role decidido só a partir de `profiles`.
 
+## v0.5 — Admin completo, calendário de datas, referência ANAC real
+
+**STATUS: FECHADA** (tag `v0.5.0`, 2026-08-17) — extensão pós-v0.4.0 fechada formalmente. Admin (FASE A/B/C completas), calendário de flexibilidade de datas (DEC-122, resolve DEC-008 da v0.2), `scripts/import_anac_fares.py` funcionando de ponta a ponta com 7 meses de referência real (DEC-123), 27 capitais brasileiras no seletor de Radar (DEC-124), domínio próprio + hub RhoneyInc (DEC-119), 3 bugs reais corrigidos testando em produção (condição de corrida no AdminRoute, CORS do domínio novo, SPA sem rewrite). Investigado e bloqueado por decisão de negócio (não técnica): Open Finance, WhatsApp, provider de oferta real. 103/103 pytest, Bandit limpo, 16/16 Vitest, build ok.
+
 ## Próximo
 
 - [x] Deploy (Vercel) — frontend e backend. **Concluído 2026-08-16** (DEC-118): `voaradar-api` (backend) e `voaradar-frontend` (frontend), ambos em produção, CORS liberado pro domínio real, `ssoProtection` desativado em ambos os projetos. Só URLs `*.vercel.app` padrão por enquanto — domínio próprio `voaradar.rhoneyinc.com` e entrada no hub/rodapés seguem pendentes.
