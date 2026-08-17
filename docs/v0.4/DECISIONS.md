@@ -198,3 +198,21 @@ Pedido do usuário: "vamos seguir" — resolve a pendência DEC-008 (`docs/v0.2/
 **Frontend**: `PriceCalendarView` (grade 7 colunas, cor por preço relativo ao próprio mês — verde mais barato, vermelho mais caro —, dia mais barato destacado com anel), na tela de detalhe da oferta, abaixo do `PriceIntelligenceView`. Mês derivado da própria data de ida da oferta.
 
 **Testado ao vivo em produção**: `GET /flights/calendar` retorna 31 dias corretos pra outubro/2026 com preços plausíveis; CORS confirmado liberado pro domínio real. Build, 16/16 testes de frontend e lint limpos.
+
+## DEC-123 — `scripts/import_anac_fares.py`: schema real da ANAC finalmente verificado e script escrito (2026-08-17)
+
+Pedido do usuário: "siga com a importação da anac" — pendência aberta desde o DEC-117 (2026-08-16), quando o acesso a `anac.gov.br` tinha falhado por completo a partir do sandbox e o schema do CSV nunca tinha sido confirmado contra um arquivo real.
+
+**Desta vez o domínio respondeu** (`sas.anac.gov.br`, `www.anac.gov.br` — ambos com HTTP real, diferente da tentativa anterior). Investigação em 3 camadas, todas verificadas ao vivo, nenhuma suposição:
+
+1. **Dicionário de dados oficial** (página de metadados da ANAC): 6 campos descritos (ano/mês, empresa, aeroportos origem/destino, classe, tarifa, assentos) — mas sem nome exato de coluna nem formato de arquivo.
+2. **O formulário de download é mesmo um ASP.NET WebForms com postback** (`frmDownload.aspx`, tema "Tarifas Transporte Aéreo Passageiros Domésticos" = código `14`), confirmado pelo HTML real (dropdowns `listTema`/`listAno`, botões `btnListaArquivos`/`btnBaixar`, sem API REST nem link estático).
+3. **Baixei um arquivo real** (replicando o postback via `httpx`, sem navegador): `202501.CSV` dentro de um ZIP de ~3MB, 725 mil linhas. Schema real, diferente do que qualquer busca genérica anterior tinha sugerido: `ANO;MES;EMPRESA;ORIGEM;DESTINO;TARIFA;ASSENTOS`, delimitador `;`, `TARIFA` com vírgula decimal, `ORIGEM`/`DESTINO` em código **OACI** (não IATA) — uma linha por combinação rota+faixa de tarifa+mês, não por venda individual nem por dia.
+
+**Descoberta de comportamento do formulário que custou algumas tentativas**: mudar o dropdown de ano (`listAno`) e clicar "Buscar Arquivos" **na mesma requisição** não funciona — o grid fica preso no ano padrão (2002, o mais antigo). É preciso separar em duas requisições: 1) `__EVENTTARGET` simulando o autopostback do dropdown sozinho, **depois** 2) uma segunda requisição clicando "Buscar Arquivos" com o `VIEWSTATE` atualizado da resposta anterior. Só assim o servidor realmente troca o ano da listagem.
+
+**Implementado**: `scripts/import_anac_fares.py` — replica o fluxo de 4 passos (sessão+VIEWSTATE → seleciona ano → busca arquivos → marca o mês certo e baixa), extrai o CSV do ZIP em memória, agrega por rota com **média ponderada por `ASSENTOS`** (não média simples — uma tarifa vendida pra 40 assentos pesa mais que uma vendida pra 1), e faz upsert em `anac_fare_reference` via `AnacFareRepository` já existente (DEC-117/118). Mapeamento OACI→IATA restrito aos 5 aeroportos que o VoaRadar já conhece (`BEL`/`REC`/`FOR`/`BSB`/`SSA`) — verificado via busca real, não memória — importar o Brasil inteiro não é o escopo desta etapa.
+
+**Testado com dado real de produção, não simulado**: rodado pra janeiro/2025, importou 20 rotas (todas as combinações entre os 5 aeroportos) com preço médio e tamanho de amostra reais (ex: BEL→REC R$ 1.106,48, amostra de 1.177 assentos). Confirmado no banco via SQL direto, e confirmado no endpoint real: `GET /flights/price-intelligence/offer-rec-001?price=429` agora devolve `anac_reference` preenchido (antes sempre `null`) — primeira vez que o `AnacFareProvider` tem dado de verdade por trás.
+
+103/103 testes de backend (nenhum novo — script não tem teste automatizado, é uma rotina offline validada manualmente com dado real, mesmo padrão de `scripts/seed_history.py`), Bandit limpo em `app` e `scripts`.
