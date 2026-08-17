@@ -58,14 +58,15 @@ Divergências conscientes do PRD original, todas registradas em [docs/v0.2/DECIS
 
 **STATUS: FECHADA** (tag `v0.4.0`, 2026-08-14) — documentação completa em [docs/v0.4/](docs/v0.4/). FASE 0-10 concluídas: modelo Radar, regras de disparo, monitoramento, RLS/segurança, backend (auth real via Supabase, radar engine, evaluation service), frontend (login, Meus Radares, central de notificações), 92/92 pytest, Bandit limpo, 16/16 Vitest, 7/7 E2E, checklist formal das 5 falhas de vibe coding. *(Item corrigido nesta revisão — este arquivo listava "Alertas (v0.4)" como pendente por desatualização, quando já estava lançada.)*
 
-**Extensão pós-release, em andamento**: Admin padrão (`rhoneyinc@gmail.com`) — só **FASE A** concluída (`profiles.role` + trigger + `GET /auth/me`, DEC-116). FASE B (painel admin) ainda não definida em detalhe; FASE C (login social Google) mencionada como planejada.
+**Extensão pós-release, em andamento**: Admin padrão (`rhoneyinc@gmail.com`) — **FASE A** (`profiles.role` + trigger + `GET /auth/me`, DEC-116) e **FASE C** (login social Google, DEC-120, 2026-08-17) concluídas. FASE B (painel admin) ainda não definida em detalhe.
 
 ## Próximo
 
 - [x] Deploy (Vercel) — frontend e backend. **Concluído 2026-08-16** (DEC-118): `voaradar-api` (backend) e `voaradar-frontend` (frontend), ambos em produção, CORS liberado pro domínio real, `ssoProtection` desativado em ambos os projetos. Só URLs `*.vercel.app` padrão por enquanto — domínio próprio `voaradar.rhoneyinc.com` e entrada no hub/rodapés seguem pendentes.
 - [x] **"RhoneyInc Zero-Cost API First"** (2026-08-16, DEC-117/DEC-118) — `AnacFareProvider`/`FareReferenceProvider` implementado e em produção (`anac_reference` no Price Intelligence, opcional, nunca quebra a resposta). Pendente: `scripts/import_anac_fares.py` — schema real do CSV da ANAC ainda não verificado (ferramenta de consulta interativa, não link estático; acesso ao domínio falhou do sandbox). Sem esse script, a tabela `anac_fare_reference` fica vazia e `anac_reference` sempre `null` em produção.
 - [ ] Calendário completo de flexibilidade de datas (DEC-008 de `docs/v0.2/DECISIONS.md`).
-- [ ] Admin — FASE B (painel) e FASE C (login social Google), ainda sem plano detalhado.
+- [x] Admin — FASE C (login social Google). **Concluído 2026-08-17** (DEC-120).
+- [ ] Admin — FASE B (painel), ainda sem plano detalhado.
 - [ ] Provider de oferta real (Amadeus Enterprise, Duffel, outro) — `BLOCKED` até aprovação explícita de orçamento, fora do escopo até haver decisão de negócio.
 - [ ] Inteligência artificial / recomendações (v0.5).
 

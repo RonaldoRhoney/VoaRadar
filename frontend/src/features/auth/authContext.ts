@@ -5,6 +5,8 @@ export interface AuthState {
   session: Session | null;
   signup: (email: string, password: string) => Promise<{ confirmationRequired: boolean }>;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => void;
+  completeOAuthSession: (tokens: { accessToken: string; refreshToken: string; expiresIn: number }) => void;
   logout: () => Promise<void>;
 }
 

@@ -12,3 +12,4 @@ __pycache__/
 test-results/
 playwright-report/
 frontend-preview.html
+client_secret_*.json

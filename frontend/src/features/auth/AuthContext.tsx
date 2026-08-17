@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import * as api from "../../services/api";
 import { AuthContext } from "./authContext";
+import { redirectToGoogleLogin } from "./oauth";
 import { clearSession, isExpired, loadSession, saveSession } from "./session";
 import type { Session } from "../../types/auth";
 import type { AuthState } from "./authContext";
@@ -29,6 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       async login(email, password) {
         const newSession = await api.login(email, password);
+        saveSession(newSession);
+        setSession(newSession);
+      },
+      loginWithGoogle() {
+        redirectToGoogleLogin();
+      },
+      completeOAuthSession(tokens) {
+        const newSession: Session = {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expiresAt: Date.now() + tokens.expiresIn * 1000,
+        };
         saveSession(newSession);
         setSession(newSession);
       },

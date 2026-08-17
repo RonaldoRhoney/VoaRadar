@@ -146,3 +146,17 @@ Pedido do usuário (2026-08-16): "publique o VoaRadar com os mesmo padrões Rhon
 ## Pendência herdada da v0.3 — resolvida
 
 Tag `v0.3.1` cortada em 2026-08-14 (commit `4ce0d72`), cobrindo os 2 commits de segurança pós-`v0.3.0` (`b36e624`, `a7c698b`) + o E2E que faltava. Ver `docs/v0.3/ACCEPTANCE.md`.
+
+## DEC-120 — Admin FASE C: login social Google habilitado (2026-08-17)
+
+Pedido do usuário: "vamos habilitar login com google" — completa a FASE C mencionada em DEC-116 (Admin padrão), que até aqui só tinha a FASE A (`profiles.role` + trigger) concluída.
+
+**Arquitetura**: o backend já validava qualquer JWT emitido pelo Supabase Auth via JWKS (`app/core/auth.py`), provider-agnostic desde sempre — login social não exigiu nenhuma mudança no backend. Só o frontend precisou de: `features/auth/oauth.ts` (redireciona o navegador pro fluxo OAuth do Supabase, sem depender de `supabase-js` — mantém a arquitetura existente de auth via backend REST, só o redirect inicial e o parse do retorno acontecem client-side, que é inerente ao fluxo OAuth de página inteira), nova página `AuthCallback` (lê o token do fragmento da URL, nunca da query string — não vai pro histórico nem pra log de servidor), e botão "Continuar com Google" em `Login`/`Signup`.
+
+**Google OAuth Client "VoaRadar Supabase"** criado pelo usuário no projeto Google Cloud `meupet-501512` (mesmo projeto de MeuPet/KnowRa/FinTra, cada produto com seu próprio Client ID — confirma o padrão já documentado na memória RhoneyInc). Callback `https://ehdjptcyhzszglrlvpjz.supabase.co/auth/v1/callback` autorizado no Google. Auth do Supabase (Site URL, redirect URLs, provider Google) configurado via Management API com um Personal Access Token gerado pelo usuário — mesmo fluxo do FinTra, nenhum clique manual no dashboard do Supabase além de gerar o token.
+
+**Gotcha de segurança recorrente, corrigido de novo**: um `client_secret_*.json` baixado do Google Cloud Console apareceu na raiz do repo durante a configuração — removido do disco antes de qualquer commit, `client_secret_*.json` adicionado ao `.gitignore` (mesmo achado do FinTra DEC-001 — vale registrar como passo permanente do checklist de qualquer produto RhoneyInc que configure Google OAuth).
+
+**Testado ao vivo em produção**: `GET /auth/v1/authorize?provider=google` redireciona corretamente pro Google com o `client_id` certo e `redirect_uri` apontando pro callback do Supabase do VoaRadar. Build, 16/16 testes de frontend e lint continuam limpos.
+
+Deploy de produção do frontend atualizado (`voaradar.rhoneyinc.com`), com `VITE_SUPABASE_URL` configurada.

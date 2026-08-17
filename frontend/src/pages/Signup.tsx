@@ -2,9 +2,10 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/useAuth";
 import { ApiError } from "../services/api";
+import { GoogleIcon } from "./Login";
 
 export function Signup() {
-  const { signup } = useAuth();
+  const { signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,44 +46,61 @@ export function Signup() {
       <h1 className="text-2xl font-semibold text-white">Criar conta</h1>
       <p className="mt-1 text-sm text-white/60">Crie Radares e receba notificações de oportunidade.</p>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4 rounded-2xl bg-night-800/80 p-6 ring-1 ring-white/10">
-        <label className="flex flex-col gap-2 text-sm text-white/70">
-          E-mail
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm text-white/70">
-          Senha
-          <input
-            required
-            minLength={8}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
-          />
-        </label>
-
-        {status === "error" && (
-          <p role="alert" className="text-sm text-red-400">
-            {errorMessage}
-          </p>
-        )}
-
+      <div className="mt-6 flex flex-col gap-4 rounded-2xl bg-night-800/80 p-6 ring-1 ring-white/10">
         <button
-          type="submit"
-          disabled={status === "loading"}
-          className="rounded-lg bg-sky-500 px-4 py-3 font-medium text-white transition hover:bg-sky-600 disabled:opacity-50"
+          type="button"
+          onClick={loginWithGoogle}
+          className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-night-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/5"
         >
-          {status === "loading" ? "Criando conta..." : "Criar conta"}
+          <GoogleIcon />
+          Continuar com Google
         </button>
-      </form>
+
+        <div className="flex items-center gap-3 text-xs text-white/40">
+          <span className="h-px flex-1 bg-white/10" />
+          ou
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2 text-sm text-white/70">
+            E-mail
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm text-white/70">
+            Senha
+            <input
+              required
+              minLength={8}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="rounded-lg border border-white/10 bg-night-900 px-3 py-2.5 text-white outline-none focus:border-sky-500"
+            />
+          </label>
+
+          {status === "error" && (
+            <p role="alert" className="text-sm text-red-400">
+              {errorMessage}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="rounded-lg bg-sky-500 px-4 py-3 font-medium text-white transition hover:bg-sky-600 disabled:opacity-50"
+          >
+            {status === "loading" ? "Criando conta..." : "Criar conta"}
+          </button>
+        </form>
+      </div>
 
       <p className="mt-4 text-center text-sm text-white/50">
         Já tem conta?{" "}
